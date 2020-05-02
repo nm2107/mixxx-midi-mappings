@@ -33,6 +33,86 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>hotcue_1_activate</key>
+                <description>Hotcue 1 button press.</description>
+                <status>0x90</status>
+                <midino>0x17</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>hotcue_2_activate</key>
+                <description>Hotcue 2 button press.</description>
+                <status>0x90</status>
+                <midino>0x18</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>hotcue_3_activate</key>
+                <description>Hotcue 3 button press.</description>
+                <status>0x90</status>
+                <midino>0x25</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>hotcue_4_activate</key>
+                <description>Hotcue 4 button press.</description>
+                <status>0x90</status>
+                <midino>0x20</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>hotcue_5_activate</key>
+                <description>Hotcue 1 (MIDIBANK2) button press.</description>
+                <status>0x90</status>
+                <midino>0x73</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>hotcue_6_activate</key>
+                <description>Hotcue 2 (MIDIBANK2) button press.</description>
+                <status>0x90</status>
+                <midino>0x74</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>hotcue_7_activate</key>
+                <description>Hotcue 3 (MIDIBANK2) button press.</description>
+                <status>0x90</status>
+                <midino>0x75</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>hotcue_8_activate</key>
+                <description>Hotcue 4 (MIDIBANK2) button press.</description>
+                <status>0x90</status>
+                <midino>0x76</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>eject</key>
                 <description>
                     Eject the track on USB eject button press.
@@ -433,66 +513,146 @@
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_1_enabled</key>
-                <description>Turn on hotcue 1 dimmer light on startup.</description>
+                <description>Turn on hotcue 1 dimmer light.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x12</on>
+                <maximum>0</maximum>
             </output>
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_2_enabled</key>
-                <description>Turn on hotcue 2 dimmer light on startup.</description>
+                <description>Turn on hotcue 2 dimmer light.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x14</on>
+                <maximum>0</maximum>
             </output>
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_3_enabled</key>
-                <description>Turn on hotcue 3 dimmer light on startup.</description>
+                <description>Turn on hotcue 3 dimmer light.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x16</on>
+                <maximum>0</maximum>
             </output>
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_4_enabled</key>
-                <description>Turn on hotcue 4 dimmer light on startup.</description>
+                <description>Turn on hotcue 4 dimmer light.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x18</on>
+                <maximum>0</maximum>
             </output>
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_5_enabled</key>
-                <description>Turn on hotcue 1 (MIDIBANK2) dimmer light on startup.</description>
+                <description>Turn on hotcue 1 (MIDIBANK2) dimmer light.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x32</on>
+                <maximum>0</maximum>
             </output>
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_6_enabled</key>
-                <description>Turn on hotcue 2 (MIDIBANK2) dimmer light on startup.</description>
+                <description>Turn on hotcue 2 (MIDIBANK2) dimmer light.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x34</on>
+                <maximum>0</maximum>
             </output>
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_7_enabled</key>
-                <description>Turn on hotcue 3 (MIDIBANK2) dimmer light on startup.</description>
+                <description>Turn on hotcue 3 (MIDIBANK2) dimmer light.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x36</on>
+                <maximum>0</maximum>
             </output>
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_8_enabled</key>
-                <description>Turn on hotcue 4 (MIDIBANK2) dimmer light on startup.</description>
+                <description>Turn on hotcue 4 (MIDIBANK2) dimmer light.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x38</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_1_enabled</key>
+                <description>Turn on hotcue 1 light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x11</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_2_enabled</key>
+                <description>Turn on hotcue 2 light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x13</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_3_enabled</key>
+                <description>Turn on hotcue 3 light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x15</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_4_enabled</key>
+                <description>Turn on hotcue 4 light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x17</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_5_enabled</key>
+                <description>Turn on hotcue 1 (MIDIBANK2) light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x31</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_6_enabled</key>
+                <description>Turn on hotcue 2 (MIDIBANK2) light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x33</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_7_enabled</key>
+                <description>Turn on hotcue 3 (MIDIBANK2) light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x35</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_8_enabled</key>
+                <description>Turn on hotcue 4 (MIDIBANK2) light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x37</on>
+                <minimum>1</minimum>
             </output>
             <output>
                 <group>[Channel1]</group>
