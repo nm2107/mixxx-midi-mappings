@@ -44,3 +44,8 @@ Open mixxx, and go to the controller settings. For each of your decks, load the
 mapping file matching the MIDI channel of your deck. Then, make sure that the
 MIDI input and output controls are directed to this channel (see the first
 column), as mixxx can fallback to Channel1 by default.
+
+Channel1 is for Deck1, Channel2 is for Deck2, and so on.
+
+Also, make sure to configure your hardware to send and receive MIDI signals on
+the appropriate channel.

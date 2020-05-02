@@ -7,7 +7,9 @@
         <wiki>https://github.com/nm2107/mixxx-midi-mappings</wiki>
     </info>
     <controller id="SC3900-Deck1">
-        <scriptfiles/>
+        <scriptfiles>
+            <file functionprefix="DenonSC3900" filename="Denon-SC3900-scripts.js"/>
+        </scriptfiles>
         <controls>
             <control>
                 <group>[Channel1]</group>
@@ -380,6 +382,16 @@
                     <normal/>
                 </options>
             </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.midiBankSwitch</key>
+                <description>MIDI BANK button release.</description>
+                <status>0x80</status>
+                <midino>0x77</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
         </controls>
         <outputs>
             <output>
@@ -403,7 +415,7 @@
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_4_enabled</key>
-                <description>Hotcue 4 dimmer light.</description>
+                <description>Turn on hotcue 4 dimmer light on startup.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x18</on>
@@ -411,7 +423,7 @@
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_6_enabled</key>
-                <description>Hotcue 2 (MIDIBANK2) dimmer light.</description>
+                <description>Turn on hotcue 2 (MIDIBANK2) dimmer light on startup.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x34</on>
@@ -437,7 +449,7 @@
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_2_enabled</key>
-                <description>Hotcue 2 dimmer light.</description>
+                <description>Turn on hotcue 2 dimmer light on startup.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x14</on>
@@ -445,7 +457,7 @@
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_7_enabled</key>
-                <description>Hotcue 3 (MIDIBANK2) dimmer light.</description>
+                <description>Turn on hotcue 3 (MIDIBANK2) dimmer light on startup.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x36</on>
@@ -453,7 +465,7 @@
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_8_enabled</key>
-                <description>Hotcue 4 (MIDIBANK2) dimmer light.</description>
+                <description>Turn on hotcue 4 (MIDIBANK2) dimmer light on startup.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x38</on>
@@ -461,7 +473,7 @@
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_1_enabled</key>
-                <description>Hotcue 1 dimmer light.</description>
+                <description>Turn on hotcue 1 dimmer light on startup.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x12</on>
@@ -592,7 +604,7 @@
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_3_enabled</key>
-                <description>Hotcue 3 dimmer light.</description>
+                <description>Turn on hotcue 3 dimmer light on startup.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x16</on>
@@ -636,7 +648,7 @@
             <output>
                 <group>[Channel1]</group>
                 <key>hotcue_5_enabled</key>
-                <description>Hotcue 5 dimmer light.</description>
+                <description>Turn on hotcue 1 (MIDIBANK2) dimmer light on startup.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x32</on>
