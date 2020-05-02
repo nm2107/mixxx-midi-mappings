@@ -131,12 +131,22 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>sync_enabled</key>
-                <description>SYNC button press, toggles BPM Sync mode.</description>
+                <key>DenonSC3900.syncButtonPress</key>
+                <description>SYNC button press.</description>
                 <status>0x90</status>
                 <midino>0x6B</midino>
                 <options>
-                    <normal/>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.syncButtonRelease</key>
+                <description>SYNC button release.</description>
+                <status>0x80</status>
+                <midino>0x6B</midino>
+                <options>
+                    <script-binding/>
                 </options>
             </control>
             <control>
