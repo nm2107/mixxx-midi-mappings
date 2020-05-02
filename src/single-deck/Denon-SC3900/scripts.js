@@ -41,6 +41,45 @@ var HOTCUES_WRITE_ADDRESSES = {
     }
 }
 
+var LONG_PRESS_THRESHOLD_MS = 500;
+
+// #############################################################################
+// ## Utilities
+// #############################################################################
+
+/**
+ * @param number inputChannel (0 based)
+ *
+ * @return string
+ */
+function getGroup (inputChannel) {
+    var channelNumber = inputChannel + 1;
+
+    return "[Channel" + channelNumber + "]";
+}
+
+/**
+ * @param number inputChannel (0 based)
+ *
+ * @return number (hex)
+ */
+function getOutputMidiChannel (inputChannel) {
+    // As specified in the Denon manual : signals must be sent on 0xBn where
+    // n is the channel number [0-15].
+    return 0xB0 + inputChannel;
+}
+
+/**
+ * @return int The current timestamp, in miliseconds.
+ */
+function getTimestampMs () {
+    return Date.now();
+}
+
+// #############################################################################
+// ## Registries
+// #############################################################################
+
 /**
  * Constructor for a registry which would indicate whether the CLR button is
  * being held down or not.
@@ -64,32 +103,48 @@ function createClrButtonRegistry () {
         isPressed: function (group) {
             return isPresentInRegistry(group);
         }
-    }
+    };
 }
 
 var clrButtonRegistry = createClrButtonRegistry()
 
 /**
- * @param number inputChannel (0 based)
- *
- * @return string
+ * Constructor for a registry which would indicate when the SYNC button has
+ * been pressed down.
  */
-function getGroup (inputChannel) {
-    var channelNumber = inputChannel + 1;
+function createSyncButtonRegistry () {
+    var registry = {}
 
-    return "[Channel" + channelNumber + "]";
+    var isPresentInRegistry = function (group) {
+        return undefined !== registry[group]
+    }
+
+    return {
+        recordPressTimestamp: function (group) {
+            registry[group] = getTimestampMs();
+        },
+        popPressTimestamp: function (group) {
+            if (!isPresentInRegistry(group)) {
+                return 0;
+            }
+
+            var pressTimestamp = registry[group];
+
+            delete registry[group];
+
+            return pressTimestamp;
+        },
+        isPressed: function (group) {
+            return isPresentInRegistry(group);
+        }
+    };
 }
 
-/**
- * @param number inputChannel (0 based)
- *
- * @return number (hex)
- */
-function getOutputMidiChannel (inputChannel) {
-    // As specified in the Denon manual : signals must be sent on 0xBn where
-    // n is the channel number [0-15].
-    return 0xB0 + inputChannel;
-}
+var syncButtonRegistry = createSyncButtonRegistry()
+
+// #############################################################################
+// ## Hotcues management
+// #############################################################################
 
 /**
  * @param number outputChannel
@@ -156,4 +211,48 @@ for (var i = 1; i < 9; i++) {
 
     // create hotcueXPress handlers
     DenonSC3900[hotcuePressHandlerName] = createHotcuePressHandler(i)
+}
+
+// #############################################################################
+// ## SYNC management
+// #############################################################################
+
+// on SYNC button press
+DenonSC3900.syncButtonPress = function (channel) {
+    // A long press on the SYNC button (press and hold) should set the deck
+    // as the sync master.
+    // A short press on the SYNC button should toggle the sync feature for this
+    // deck.
+
+    var group = getGroup(channel)
+
+    syncButtonRegistry.recordPressTimestamp(group)
+
+    engine.beginTimer(
+        LONG_PRESS_THRESHOLD_MS,
+        function () {
+            if (syncButtonRegistry.isPressed(group)) {
+                // the SYNC button is still pressed after the elapsed threshold,
+                // set this deck as the sync master.
+                engine.setValue(group, "sync_master", true);
+            }
+        },
+        true
+    );
+}
+
+// on SYNC button release
+DenonSC3900.syncButtonRelease = function (channel) {
+    var releaseTimestamp = getTimestampMs();
+    var group = getGroup(channel);
+    var pressTimestamp = syncButtonRegistry.popPressTimestamp(group);
+
+    var heldDownDuration = releaseTimestamp - pressTimestamp;
+
+    if (heldDownDuration < LONG_PRESS_THRESHOLD_MS) {
+        // short press on SYNC button, toggle the sync mode for this deck
+        var currentSyncState = engine.getValue(group, "sync_enabled");
+
+        engine.setValue(group, "sync_enabled", !currentSyncState);
+    }
 }
