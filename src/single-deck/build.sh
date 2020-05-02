@@ -17,6 +17,7 @@ build_deck () {
 
     mkdir -p "${deck_dist_dir}"
 
+    # copy XML files (one per channel)
     for (( deck_channel=1; deck_channel<=$SINGLE_DECKS_COUNT; deck_channel++ )); do
         local channel_dist_path="${deck_dist_dir}/${deck_name}_Channel${deck_channel}.midi.xml"
 
@@ -27,6 +28,9 @@ build_deck () {
             sed -i "s/Channel1/Channel${deck_channel}/g" "${channel_dist_path}"
         fi
     done
+
+    # copy JS file
+    cp "${HERE_PATH}/${deck_name}/scripts.js" "${deck_dist_dir}/${deck_name}-scripts.js"
 }
 
 main () {
