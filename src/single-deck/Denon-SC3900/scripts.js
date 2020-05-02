@@ -84,9 +84,10 @@ DenonSC3900.renderHotcuesLights = function (outputChannel, group) {
     }
 }
 
+// on MIDIBANK switch
 DenonSC3900.midiBankSwitch = function (channel, control, value, status) {
-    // There is no way to know if the MIDIBANK2 is enabled on the denon unit,
-    // so we light all the dimmers to cover the two cases
+    // There is no way to know if the MIDIBANK2 is enabled on the Denon unit,
+    // so we render the 8 hotcues lights to cover the two cases
     // (MIDIBANK2 enabled/disabled).
     DenonSC3900.renderHotcuesLights(
         DenonSC3900.getOutputMidiChannel(channel),
