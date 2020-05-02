@@ -50,17 +50,6 @@ DenonSC3900.LONG_PRESS_THRESHOLD_MS = 500;
 /**
  * @param number inputChannel (0 based)
  *
- * @return string
- */
-DenonSC3900.getGroup = function (inputChannel) {
-    var channelNumber = inputChannel + 1;
-
-    return "[Channel" + channelNumber + "]";
-}
-
-/**
- * @param number inputChannel (0 based)
- *
  * @return number (hex)
  */
 DenonSC3900.getOutputMidiChannel = function (inputChannel) {
@@ -166,34 +155,28 @@ DenonSC3900.renderHotcuesLights = function (outputChannel, group) {
 }
 
 // on MIDIBANK switch
-DenonSC3900.midiBankSwitch = function (channel) {
+DenonSC3900.midiBankSwitch = function (channel, control, value, status, group) {
     // There is no way to know if the MIDIBANK2 is enabled on the Denon unit,
     // so we render the 8 hotcues lights to cover the two cases
     // (MIDIBANK2 enabled/disabled).
     DenonSC3900.renderHotcuesLights(
         DenonSC3900.getOutputMidiChannel(channel),
-        DenonSC3900.getGroup(channel)
+        group
     )
 }
 
 // on CLR button press
-DenonSC3900.clrButtonPress = function (channel) {
-    DenonSC3900.clrButtonRegistry.buttonPressed(
-        DenonSC3900.getGroup(channel)
-    )
+DenonSC3900.clrButtonPress = function (channel, control, value, status, group) {
+    DenonSC3900.clrButtonRegistry.buttonPressed(group)
 }
 
 // on CLR button release
-DenonSC3900.clrButtonRelease = function (channel) {
-    DenonSC3900.clrButtonRegistry.buttonReleased(
-        DenonSC3900.getGroup(channel)
-    )
+DenonSC3900.clrButtonRelease = function (channel, control, value, status, group) {
+    DenonSC3900.clrButtonRegistry.buttonReleased(group)
 }
 
 // on a hotcue press
-DenonSC3900.hotcuePress = function (inputChannel, hotcueNumber) {
-    var group = DenonSC3900.getGroup(inputChannel)
-
+DenonSC3900.hotcuePress = function (group, hotcueNumber) {
     var action = DenonSC3900.clrButtonRegistry.isPressed(group)
         ? "clear"
         : "activate"
@@ -205,8 +188,8 @@ DenonSC3900.hotcuePress = function (inputChannel, hotcueNumber) {
 }
 
 DenonSC3900.createHotcuePressHandler = function (hotcueNumber) {
-    return function (channel) {
-        DenonSC3900.hotcuePress(channel, hotcueNumber)
+    return function (channel, control, value, status, group) {
+        DenonSC3900.hotcuePress(group, hotcueNumber)
     }
 }
 
@@ -222,13 +205,11 @@ for (var i = 1; i < 9; i++) {
 // #############################################################################
 
 // on SYNC button press
-DenonSC3900.syncButtonPress = function (channel) {
+DenonSC3900.syncButtonPress = function (channel, control, value, status, group) {
     // A long press on the SYNC button (press and hold) should set the deck
     // as the sync master.
     // A short press on the SYNC button should toggle the sync feature for this
     // deck.
-
-    var group = DenonSC3900.getGroup(channel)
 
     DenonSC3900.syncButtonRegistry.recordPressTimestamp(group)
 
@@ -246,9 +227,8 @@ DenonSC3900.syncButtonPress = function (channel) {
 }
 
 // on SYNC button release
-DenonSC3900.syncButtonRelease = function (channel) {
+DenonSC3900.syncButtonRelease = function (channel, control, value, status, group) {
     var releaseTimestamp = DenonSC3900.getTimestampMs();
-    var group = DenonSC3900.getGroup(channel);
     var pressTimestamp = DenonSC3900.syncButtonRegistry.popPressTimestamp(group);
 
     var heldDownDuration = releaseTimestamp - pressTimestamp;
