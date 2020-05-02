@@ -232,8 +232,18 @@
             <control>
                 <group>[Channel1]</group>
                 <key>beatloop_activate</key>
-                <description>Activate beatloop on AUTO LOOP button press.</description>
+                <description>AUTO LOOP button press.</description>
                 <status>0x90</status>
+                <midino>0x1D</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>beatloop_activate</key>
+                <description>AUTO LOOP button release.</description>
+                <status>0x80</status>
                 <midino>0x1D</midino>
                 <options>
                     <normal/>
