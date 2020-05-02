@@ -33,16 +33,6 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>loop_double</key>
-                <description>Double loop size on loop + button press.</description>
-                <status>0x90</status>
-                <midino>0x6A</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
                 <key>eject</key>
                 <description>
                     Eject the track on USB eject button press.
@@ -81,6 +71,36 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>reverse</key>
+                <description>Resume playback in forward direction on reverse button release.</description>
+                <status>0x80</status>
+                <midino>0x46</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>loop_in</key>
+                <description>Tell loop in point to follow cursor on A button press.</description>
+                <status>0x90</status>
+                <midino>0x37</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>loop_in</key>
+                <description>Set loop in point on A button release.</description>
+                <status>0x80</status>
+                <midino>0x37</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>loop_out</key>
                 <description>Tell loop out point to follow cursor on B button press.</description>
                 <status>0x90</status>
@@ -111,6 +131,26 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>loop_double</key>
+                <description>Double loop size on loop + button press.</description>
+                <status>0x90</status>
+                <midino>0x6A</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>beatloop_activate</key>
+                <description>Activate beatloop on AUTO LOOP button press.</description>
+                <status>0x90</status>
+                <midino>0x1D</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>keylock</key>
                 <description>Toggle key lock on KEY ADJUST button press.</description>
                 <status>0x90</status>
@@ -131,10 +171,73 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>cue_default</key>
+                <description>
+                    On CUE button press : set CUE point when not on a CUE point,
+                    or start CUE playback when on a CUE point.
+                </description>
+                <status>0x90</status>
+                <midino>0x42</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>play</key>
+                <description>Play button press.</description>
+                <status>0x90</status>
+                <midino>0x43</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>reverseroll</key>
                 <description>Start slip playback on DUMP button press.</description>
                 <status>0x90</status>
                 <midino>0x45</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>reverseroll</key>
+                <description>Stop slip playback on DUMP button release.</description>
+                <status>0x80</status>
+                <midino>0x45</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>rate_temp_down</key>
+                <description>Start negative pitch bend on pitch bend - button press.</description>
+                <status>0x90</status>
+                <midino>0x09</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>rate_temp_down</key>
+                <description>Stop negative pitch bend on pitch bend - button release.</description>
+                <status>0x80</status>
+                <midino>0x09</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>rate_temp_up</key>
+                <description>Start positive pitch bend on pitch bend + button press.</description>
+                <status>0x90</status>
+                <midino>0x08</midino>
                 <options>
                     <normal/>
                 </options>
@@ -160,6 +263,26 @@
                 </options>
             </control>
             <control>
+                <group>[Library]</group>
+                <key>MoveUp</key>
+                <description>Rotate SELECT knob counter clock wise : move up selection.</description>
+                <status>0xB0</status>
+                <midino>0x54</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Library]</group>
+                <key>MoveDown</key>
+                <description>Rotate SELECT knob clock wise : move down selection.</description>
+                <status>0xB0</status>
+                <midino>0x54</midino>
+                <options>
+                    <invert/>
+                </options>
+            </control>
+            <control>
                 <group>[Channel1]</group>
                 <key>LoadSelectedTrack</key>
                 <description>SELECT knob press.</description>
@@ -175,16 +298,6 @@
                 <description>Move focused area backward on BACK button press.</description>
                 <status>0x90</status>
                 <midino>0x30</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>rate_temp_down</key>
-                <description>Stop negative pitch bend on pitch bend - button release.</description>
-                <status>0x80</status>
-                <midino>0x09</midino>
                 <options>
                     <normal/>
                 </options>
@@ -221,75 +334,22 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>reverse</key>
-                <description>Resume playback in forward direction on reverse button release.</description>
+                <key>beatjump_backward</key>
+                <description>Fast search - button press.</description>
+                <status>0x90</status>
+                <midino>0x11</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>beatjump_backward</key>
+                <description>Fast search - button release.</description>
                 <status>0x80</status>
-                <midino>0x46</midino>
+                <midino>0x11</midino>
                 <options>
                     <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>loop_in</key>
-                <description>Tell loop in point to follow cursor on A button press.</description>
-                <status>0x90</status>
-                <midino>0x37</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>loop_in</key>
-                <description>Set loop in point on A button release.</description>
-                <status>0x80</status>
-                <midino>0x37</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>cue_default</key>
-                <description>
-                    On CUE button press : set CUE point when not on a CUE point,
-                    or start CUE playback when on a CUE point.
-                </description>
-                <status>0x90</status>
-                <midino>0x42</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>rate_temp_up</key>
-                <description>Start positive pitch bend on pitch bend + button press.</description>
-                <status>0x90</status>
-                <midino>0x08</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Library]</group>
-                <key>MoveUp</key>
-                <description>Rotate SELECT knob counter clock wise : move up selection.</description>
-                <status>0xB0</status>
-                <midino>0x54</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Library]</group>
-                <key>MoveDown</key>
-                <description>Rotate SELECT knob clock wise : move down selection.</description>
-                <status>0xB0</status>
-                <midino>0x54</midino>
-                <options>
-                    <invert/>
                 </options>
             </control>
             <control>
@@ -314,70 +374,10 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>play</key>
-                <description>Play button press.</description>
-                <status>0x90</status>
-                <midino>0x43</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>rate_temp_down</key>
-                <description>Start negative pitch bend on pitch bend - button press.</description>
-                <status>0x90</status>
-                <midino>0x09</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
                 <key>repeat</key>
                 <description>Toggle track repeat mode on SINGLE/CONT. button press.</description>
                 <status>0x90</status>
                 <midino>0x26</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>beatloop_activate</key>
-                <description>Activate beatloop on AUTO LOOP button press.</description>
-                <status>0x90</status>
-                <midino>0x1D</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>beatjump_backward</key>
-                <description>Fast search - button press.</description>
-                <status>0x90</status>
-                <midino>0x11</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>beatjump_backward</key>
-                <description>Fast search - button release.</description>
-                <status>0x80</status>
-                <midino>0x11</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>reverseroll</key>
-                <description>Stop slip playback on DUMP button release.</description>
-                <status>0x80</status>
-                <midino>0x45</midino>
                 <options>
                     <normal/>
                 </options>
@@ -394,6 +394,24 @@
             </control>
         </controls>
         <outputs>
+            <output>
+                <group>[Channel1]</group>
+                <key>quantize</key>
+                <description>Light on shift lock LED when quantize is enabled.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x59</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>quantize</key>
+                <description>Light off shift lock LED when quantize is disabled.</description>
+                <status>0xB0</status>
+                <midino>0x4B</midino>
+                <on>0x59</on>
+                <maximum>0</maximum>
+            </output>
             <output>
                 <group>[Channel1]</group>
                 <key>slip_enabled</key>
@@ -414,37 +432,11 @@
             </output>
             <output>
                 <group>[Channel1]</group>
-                <key>hotcue_4_enabled</key>
-                <description>Turn on hotcue 4 dimmer light on startup.</description>
+                <key>hotcue_1_enabled</key>
+                <description>Turn on hotcue 1 dimmer light on startup.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
-                <on>0x18</on>
-            </output>
-            <output>
-                <group>[Channel1]</group>
-                <key>hotcue_6_enabled</key>
-                <description>Turn on hotcue 2 (MIDIBANK2) dimmer light on startup.</description>
-                <status>0xB0</status>
-                <midino>0x4A</midino>
-                <on>0x34</on>
-            </output>
-            <output>
-                <group>[Channel1]</group>
-                <key>sync_enabled</key>
-                <description>Light on SYNC button when sync is enabled on this deck.</description>
-                <status>0xB0</status>
-                <midino>0x4A</midino>
-                <on>0x52</on>
-                <minimum>1</minimum>
-            </output>
-            <output>
-                <group>[Channel1]</group>
-                <key>sync_enabled</key>
-                <description>Light off SYNC button when sync is disabled on this deck.</description>
-                <status>0xB0</status>
-                <midino>0x4B</midino>
-                <on>0x52</on>
-                <maximum>0</maximum>
+                <on>0x12</on>
             </output>
             <output>
                 <group>[Channel1]</group>
@@ -453,6 +445,38 @@
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x14</on>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_3_enabled</key>
+                <description>Turn on hotcue 3 dimmer light on startup.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x16</on>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_4_enabled</key>
+                <description>Turn on hotcue 4 dimmer light on startup.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x18</on>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_5_enabled</key>
+                <description>Turn on hotcue 1 (MIDIBANK2) dimmer light on startup.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x32</on>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_6_enabled</key>
+                <description>Turn on hotcue 2 (MIDIBANK2) dimmer light on startup.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x34</on>
             </output>
             <output>
                 <group>[Channel1]</group>
@@ -472,11 +496,21 @@
             </output>
             <output>
                 <group>[Channel1]</group>
-                <key>hotcue_1_enabled</key>
-                <description>Turn on hotcue 1 dimmer light on startup.</description>
+                <key>sync_enabled</key>
+                <description>Light on SYNC button when sync is enabled on this deck.</description>
                 <status>0xB0</status>
                 <midino>0x4A</midino>
-                <on>0x12</on>
+                <on>0x52</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>sync_enabled</key>
+                <description>Light off SYNC button when sync is disabled on this deck.</description>
+                <status>0xB0</status>
+                <midino>0x4B</midino>
+                <on>0x52</on>
+                <maximum>0</maximum>
             </output>
             <output>
                 <group>[Channel1]</group>
@@ -603,14 +637,6 @@
             </output>
             <output>
                 <group>[Channel1]</group>
-                <key>hotcue_3_enabled</key>
-                <description>Turn on hotcue 3 dimmer light on startup.</description>
-                <status>0xB0</status>
-                <midino>0x4A</midino>
-                <on>0x16</on>
-            </output>
-            <output>
-                <group>[Channel1]</group>
                 <key>play_indicator</key>
                 <description>Light on play button on playback.</description>
                 <status>0xB0</status>
@@ -647,14 +673,6 @@
             </output>
             <output>
                 <group>[Channel1]</group>
-                <key>hotcue_5_enabled</key>
-                <description>Turn on hotcue 1 (MIDIBANK2) dimmer light on startup.</description>
-                <status>0xB0</status>
-                <midino>0x4A</midino>
-                <on>0x32</on>
-            </output>
-            <output>
-                <group>[Channel1]</group>
                 <key>keylock</key>
                 <description>Light on KEY ADJUST LED when keylock is enabled.</description>
                 <status>0xB0</status>
@@ -669,24 +687,6 @@
                 <status>0xB0</status>
                 <midino>0x4B</midino>
                 <on>0x08</on>
-                <maximum>0</maximum>
-            </output>
-            <output>
-                <group>[Channel1]</group>
-                <key>quantize</key>
-                <description>Light on shift lock LED when quantize is enabled.</description>
-                <status>0xB0</status>
-                <midino>0x4A</midino>
-                <on>0x59</on>
-                <minimum>1</minimum>
-            </output>
-            <output>
-                <group>[Channel1]</group>
-                <key>quantize</key>
-                <description>Light off shift lock LED when quantize is disabled.</description>
-                <status>0xB0</status>
-                <midino>0x4B</midino>
-                <on>0x59</on>
                 <maximum>0</maximum>
             </output>
         </outputs>
