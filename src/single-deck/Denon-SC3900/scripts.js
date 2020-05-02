@@ -2,10 +2,14 @@
 
 function DenonSC3900 () {}
 
-// @see Denon manual
+// @see Denon SC3900 manual for hex values, on page 34.
 DenonSC3900.LIGHT_ON = 0x4A
+DenonSC3900.LIGHT_OFF = 0x4B
 
-// @see Denon manual
+DenonSC3900.AUTO_LOOP_WRITE_ADDRESS = 0x2B
+DenonSC3900.A_LOOP_LIGHT_WRITE_ADDRESS = 0X24
+DenonSC3900.B_LOOP_LIGHT_WRITE_ADDRESS = 0X40
+
 DenonSC3900.HOTCUES_WRITE_ADDRESSES = {
     1: {
         light: 0x11,
@@ -41,6 +45,16 @@ DenonSC3900.HOTCUES_WRITE_ADDRESSES = {
     }
 }
 
+DenonSC3900.REVERSE_WRITE_ADDRESS = 0x3A
+DenonSC3900.CUE_WRITE_ADDRESS = 0x26
+DenonSC3900.PLAY_WRITE_ADDRESS = 0x27
+DenonSC3900.SYNC_WRITE_ADDRESS = 0x52
+DenonSC3900.KEY_ADJUST_WRITE_ADDRESS = 0x08
+DenonSC3900.VINYL_WRITE_ADDRESS = 0x06
+DenonSC3900.DUMP_WRITE_ADDRESS = 0x29
+DenonSC3900.SHIFT_LOCK_WRITE_ADDRESS = 0x59
+DenonSC3900.SELECT_WRITE_ADDRESS = 0x1E
+
 DenonSC3900.LONG_PRESS_THRESHOLD_MS = 500;
 
 // #############################################################################
@@ -63,6 +77,20 @@ DenonSC3900.getOutputMidiChannel = function (inputChannel) {
  */
 DenonSC3900.getTimestampMs = function () {
     return Date.now();
+}
+
+/**
+ * @return int The number of mixxx decks.
+ */
+DenonSC3900.getDecksCount = function () {
+    return engine.getValue("[Master]", "num_decks")
+}
+
+/**
+ * @return int The number of hotcues supported by the SC3900
+ */
+DenonSC3900.getHotcuesCount = function () {
+    return Object.keys(DenonSC3900.HOTCUES_WRITE_ADDRESSES).length
 }
 
 // #############################################################################
@@ -132,6 +160,55 @@ DenonSC3900.createSyncButtonRegistry = function () {
 DenonSC3900.syncButtonRegistry = DenonSC3900.createSyncButtonRegistry()
 
 // #############################################################################
+// ## Shutdown management
+// #############################################################################
+
+/**
+ * @param number outputChannel
+ */
+DenonSC3900.resetLightsToNormalMidiModeDefault = function (outputChannel) {
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.AUTO_LOOP_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.A_LOOP_LIGHT_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.B_LOOP_LIGHT_WRITE_ADDRESS);
+
+    for (var i = 1; i <= DenonSC3900.getHotcuesCount(); i++) {
+        midi.sendShortMsg(
+            outputChannel,
+            DenonSC3900.LIGHT_OFF,
+            DenonSC3900.HOTCUES_WRITE_ADDRESSES[i]["light"]
+        );
+    }
+
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.REVERSE_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.CUE_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.PLAY_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.SYNC_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.KEY_ADJUST_WRITE_ADDRESS);
+    // vinyl button is on by default in normal MIDI mode
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_ON, DenonSC3900.VINYL_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.DUMP_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.SHIFT_LOCK_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.SELECT_WRITE_ADDRESS);
+}
+
+// on mixxx shutdown
+DenonSC3900.shutdown = function () {
+    // As we don't have the channel information for the SC3900 decks during
+    // init or shutdown functions, we blindly assume that all the mixxx decks
+    // are SC3900.
+    //
+    // When leaving mixxx, we set back the SC3900 lights to their default
+    // values (i.e. as how they are when we connect the deck for the first time
+    // in normal MIDI mode).
+
+    for (var channel = 0; channel < DenonSC3900.getDecksCount(); channel++) {
+        DenonSC3900.resetLightsToNormalMidiModeDefault(
+            DenonSC3900.getOutputMidiChannel(channel)
+        );
+    }
+}
+
+// #############################################################################
 // ## Hotcues management
 // #############################################################################
 
@@ -140,7 +217,7 @@ DenonSC3900.syncButtonRegistry = DenonSC3900.createSyncButtonRegistry()
  * @param string group
  */
 DenonSC3900.renderHotcuesLights = function (outputChannel, group) {
-    for (var i = 1; i < 9; i++) {
+    for (var i = 1; i <= DenonSC3900.getHotcuesCount(); i++) {
         var settingName = "hotcue_" + i + "_position";
 
         var isHotcueSet = -1 !== engine.getValue(group, settingName)
@@ -193,7 +270,7 @@ DenonSC3900.createHotcuePressHandler = function (hotcueNumber) {
     }
 }
 
-for (var i = 1; i < 9; i++) {
+for (var i = 1; i <= DenonSC3900.getHotcuesCount(); i++) {
     var hotcuePressHandlerName = "hotcue" + i + "Press"
 
     // create hotcueXPress handlers
