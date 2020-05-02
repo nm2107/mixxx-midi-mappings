@@ -33,82 +33,82 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>hotcue_1_activate</key>
+                <key>DenonSC3900.hotcue1Press</key>
                 <description>Hotcue 1 button press.</description>
                 <status>0x90</status>
                 <midino>0x17</midino>
                 <options>
-                    <normal/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>hotcue_2_activate</key>
+                <key>DenonSC3900.hotcue2Press</key>
                 <description>Hotcue 2 button press.</description>
                 <status>0x90</status>
                 <midino>0x18</midino>
                 <options>
-                    <normal/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>hotcue_3_activate</key>
+                <key>DenonSC3900.hotcue3Press</key>
                 <description>Hotcue 3 button press.</description>
                 <status>0x90</status>
-                <midino>0x25</midino>
+                <midino>0x19</midino>
                 <options>
-                    <normal/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>hotcue_4_activate</key>
+                <key>DenonSC3900.hotcue4Press</key>
                 <description>Hotcue 4 button press.</description>
                 <status>0x90</status>
                 <midino>0x20</midino>
                 <options>
-                    <normal/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>hotcue_5_activate</key>
+                <key>DenonSC3900.hotcue5Press</key>
                 <description>Hotcue 1 (MIDIBANK2) button press.</description>
                 <status>0x90</status>
                 <midino>0x73</midino>
                 <options>
-                    <normal/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>hotcue_6_activate</key>
+                <key>DenonSC3900.hotcue6Press</key>
                 <description>Hotcue 2 (MIDIBANK2) button press.</description>
                 <status>0x90</status>
                 <midino>0x74</midino>
                 <options>
-                    <normal/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>hotcue_7_activate</key>
+                <key>DenonSC3900.hotcue7Press</key>
                 <description>Hotcue 3 (MIDIBANK2) button press.</description>
                 <status>0x90</status>
                 <midino>0x75</midino>
                 <options>
-                    <normal/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>hotcue_8_activate</key>
+                <key>DenonSC3900.hotcue8Press</key>
                 <description>Hotcue 4 (MIDIBANK2) button press.</description>
                 <status>0x90</status>
                 <midino>0x76</midino>
                 <options>
-                    <normal/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
@@ -468,6 +468,26 @@
                 <description>MIDI BANK button release.</description>
                 <status>0x80</status>
                 <midino>0x77</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.clrButtonPress</key>
+                <description>CLR button press.</description>
+                <status>0x90</status>
+                <midino>0x1A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.clrButtonRelease</key>
+                <description>CLR button release.</description>
+                <status>0x80</status>
+                <midino>0x1A</midino>
                 <options>
                     <script-binding/>
                 </options>
