@@ -50,7 +50,6 @@ DenonSC3900.CUE_WRITE_ADDRESS = 0x26
 DenonSC3900.PLAY_WRITE_ADDRESS = 0x27
 DenonSC3900.SYNC_WRITE_ADDRESS = 0x52
 DenonSC3900.KEY_ADJUST_WRITE_ADDRESS = 0x08
-DenonSC3900.VINYL_WRITE_ADDRESS = 0x06
 DenonSC3900.DUMP_WRITE_ADDRESS = 0x29
 DenonSC3900.SHIFT_LOCK_WRITE_ADDRESS = 0x59
 DenonSC3900.SELECT_WRITE_ADDRESS = 0x1E
@@ -184,8 +183,6 @@ DenonSC3900.resetLightsToNormalMidiModeDefault = function (outputChannel) {
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.PLAY_WRITE_ADDRESS);
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.SYNC_WRITE_ADDRESS);
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.KEY_ADJUST_WRITE_ADDRESS);
-    // vinyl button is on by default in normal MIDI mode
-    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_ON, DenonSC3900.VINYL_WRITE_ADDRESS);
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.DUMP_WRITE_ADDRESS);
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.SHIFT_LOCK_WRITE_ADDRESS);
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.SELECT_WRITE_ADDRESS);
