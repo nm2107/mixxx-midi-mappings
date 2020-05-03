@@ -414,12 +414,22 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>rate</key>
-                <description>Pitch slider.</description>
+                <key>DenonSC3900.pitchFaderMsb</key>
+                <description>Pitch slider MSB.</description>
                 <status>0xB0</status>
                 <midino>0x7A</midino>
                 <options>
-                    <invert/>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.pitchFaderLsb</key>
+                <description>Pitch slider LSB.</description>
+                <status>0xB0</status>
+                <midino>0x7B</midino>
+                <options>
+                    <script-binding/>
                 </options>
             </control>
             <control>

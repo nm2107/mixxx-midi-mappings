@@ -158,6 +158,24 @@ DenonSC3900.createSyncButtonRegistry = function () {
 
 DenonSC3900.syncButtonRegistry = DenonSC3900.createSyncButtonRegistry()
 
+/**
+ * Constructor for a registry which would host the MSB value of the pitch fader.
+ */
+DenonSC3900.createPitchFaderMsbRegistry = function () {
+    var registry = {}
+
+    return {
+        setPitchFaderMsb: function (group, value) {
+            registry[group] = value;
+        },
+        getPitchFaderMsb: function (group) {
+            return registry[group];
+        }
+    }
+}
+
+DenonSC3900.pitchFaderMsbRegistry = DenonSC3900.createPitchFaderMsbRegistry()
+
 // #############################################################################
 // ## Shutdown management
 // #############################################################################
@@ -313,4 +331,34 @@ DenonSC3900.syncButtonRelease = function (channel, control, value, status, group
 
         engine.setValue(group, "sync_enabled", !currentSyncState);
     }
+}
+
+// #############################################################################
+// ## Pitch fader management
+// #############################################################################
+
+// on pitch fader MSB change
+DenonSC3900.pitchFaderMsb = function (channel, control, value, status, group) {
+    DenonSC3900.pitchFaderMsbRegistry.setPitchFaderMsb(group, value);
+}
+
+// on pitch fader LSB change
+DenonSC3900.pitchFaderLsb = function (channel, control, value, status, group) {
+    var msbValue = DenonSC3900.pitchFaderMsbRegistry.getPitchFaderMsb(group);
+
+    // The `fullValue` number is determined by two number contained on a 7bits
+    // sequence. As a 7 bit sequence can contain 128 values (0-127), the
+    // `fullValue` number can contain 128*128 values : 0-16383.
+    var fullValue = (msbValue << 7) + value;
+
+    // When fullValue == 0 (min), the pitch fader is at the top position.
+    // When fullValue == 8192 (middle), the pitch fader is at the center position.
+    // When fullValue == 16383 (max), the pitch fader is at the bottom position.
+
+    var rate = (fullValue - 8192) / 8192;
+
+    // Somehow mixxx is inverting the rate (i.e. the positive pitch area is
+    // understood as the negative area and vice versa), so we fix it here by
+    // multiplying the rate by -1.
+    engine.setValue(group, "rate", rate * -1);
 }
