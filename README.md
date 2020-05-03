@@ -41,9 +41,7 @@ It will generate one XML file per deck (one per MIDI channel).
 ### Single decks
 
 Open mixxx, and go to the controller settings. For each of your decks, load the
-mapping file matching the MIDI channel of your deck. Then, make sure that the
-MIDI input and output controls are directed to this channel (see the first
-column), as mixxx can fallback to Channel1 by default.
+mapping file matching the MIDI channel of your deck.
 
 Channel1 is for Deck1, Channel2 is for Deck2, and so on.
 
