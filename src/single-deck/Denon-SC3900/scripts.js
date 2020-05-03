@@ -101,7 +101,7 @@ DenonSC3900.getHotcuesCount = function () {
 DenonSC3900.isHotcueSet = function (group, hotcueNumber) {
     var valueName = "hotcue_" + hotcueNumber + "_position";
 
-    return -1 !== engine.getValue(group, settingName);
+    return -1 !== engine.getValue(group, valueName);
 }
 
 /**
