@@ -362,3 +362,40 @@ DenonSC3900.pitchFaderLsb = function (channel, control, value, status, group) {
     // multiplying the rate by -1.
     engine.setValue(group, "rate", rate * -1);
 }
+
+// #############################################################################
+// ## Jog wheel management
+// #############################################################################
+
+// on jog wheel (vinyl disc) move in normal MIDI mode
+DenonSC3900.jogWheel = function (channel, control, value, status, group) {
+    // When moving the vinyl disc in normal MIDI mode, the SC3900 unit is
+    // sending MIDI messages by groups of 4 messages on the following
+    // control (2nd byte of the MIDI message) :
+    //
+    // 0x51
+    // 0x1A
+    // 0x1B
+    // 0x1C
+    //
+    // The 0x51 address is containing the jog bend value, centered on 0x40 (64).
+    // I don't know what are representing the values of the other addresses.
+    // Such messages aren't documented in the manual. There is some doc about
+    // 14bit messages but the addresses written in the manual aren't matching
+    // the received data, so the manual may contain errors / be outdated.
+
+    // There are no message sent by the SC3900 unit when the jog wheel stops
+    // (i.e. when the bend is centered again), which is normal because messages
+    // are sent only when moving the wheel.
+    // In order to reset the pitch bend in mixx, we can consider the values
+    // juxtaposing the center value as being the center value, as they are
+    // always sent by the SC3900 unit when the jog wheel is stopping.
+
+    var shiftedValue = (63 === value || 65 === value)
+        ? 64
+        : value
+    ;
+
+    // divide by 5 to reduce mixxx sensitivity
+    engine.setValue(group, "jog", (shiftedValue - 64) / 5);
+}
