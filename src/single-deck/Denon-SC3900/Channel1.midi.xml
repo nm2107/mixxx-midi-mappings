@@ -424,16 +424,6 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>rate</key>
-                <description>Pitch slider LSB.</description>
-                <status>0xB0</status>
-                <midino>0x7B</midino>
-                <options>
-                    <fourteen-bit-lsb/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
                 <key>beatjump_backward</key>
                 <description>Fast search - button press.</description>
                 <status>0x90</status>
