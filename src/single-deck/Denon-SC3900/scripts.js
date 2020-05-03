@@ -183,7 +183,7 @@ DenonSC3900.createSyncButtonRegistry = function () {
 DenonSC3900.syncButtonRegistry = DenonSC3900.createSyncButtonRegistry()
 
 /**
- * Constructor for a registry which would host the MSB value of the pitch fader.
+ * Constructor for a registry which would hold the MSB value of the pitch fader.
  */
 DenonSC3900.createPitchFaderMsbRegistry = function () {
     var registry = {}
@@ -199,6 +199,63 @@ DenonSC3900.createPitchFaderMsbRegistry = function () {
 }
 
 DenonSC3900.pitchFaderMsbRegistry = DenonSC3900.createPitchFaderMsbRegistry()
+
+/**
+ * Constructor for a registry which would hold the connections listening to
+ * playback indicator changes.
+ */
+DenonSC3900.createPlaybackIndicatorListenerRegistry = function () {
+    var registry = {}
+
+    return {
+        setConnection: function (group, connection) {
+            registry[group] = connection;
+        },
+        hasConnection: function (group) {
+            return undefined !== registry[group];
+        }
+    }
+}
+
+DenonSC3900.playbackIndicatorListenerRegistry = DenonSC3900.createPlaybackIndicatorListenerRegistry()
+
+/**
+ * Constructor for a registry which would hold the jog wheel count
+ * (used for jog wheel pitch bend and to know scratch direction).
+ */
+DenonSC3900.createJogWheelCountRegistry = function () {
+    var registry = {}
+
+    return {
+        setJogWheelCount: function (group, value) {
+            registry[group] = value;
+        },
+        getJogWheelCount: function (group) {
+            return registry[group];
+        }
+    }
+}
+
+DenonSC3900.jogWheelCountRegistry = DenonSC3900.createJogWheelCountRegistry()
+
+/**
+ * Constructor for a registry which would hold the jog wheel pulse MSB
+ * (used for scratch ticks computing).
+ */
+DenonSC3900.createJogWheelPulseMsbRegistry = function () {
+    var registry = {}
+
+    return {
+        setJogWheelPulseMsb: function (group, value) {
+            registry[group] = value;
+        },
+        getJogWheelPulseMsb: function (group) {
+            return registry[group];
+        }
+    }
+}
+
+DenonSC3900.jogWheelPulseMsbRegistry = DenonSC3900.createJogWheelPulseMsbRegistry()
 
 // #############################################################################
 // ## Shutdown management
@@ -389,22 +446,131 @@ DenonSC3900.pitchFaderLsb = function (channel, control, value, status, group) {
 // ## Jog wheel management
 // #############################################################################
 
-// on jog wheel (vinyl disc) move in normal MIDI mode
-DenonSC3900.jogWheel = function (channel, control, value, status, group) {
-    // When moving the vinyl disc in normal MIDI mode, the SC3900 unit is
-    // sending MIDI messages by groups of 4 messages on the following
-    // control (2nd byte of the MIDI message) :
+/**
+ * @param string group
+ */
+DenonSC3900.enableScratching = function (group) {
+    var deckNumber = script.deckFromGroup(group);
+
+    // The SC3900 unit sends 3600 messages per resolution for the jogWheelCount
+    // value, and 900 per resolution messages for the jogWheelPulseMsb and
+    // jogWheelPulseLsb, which makes a total amount of 3600 * 900 messages
+    // sent per resolution (c.f. Denon SC3900 manual).
+    var resolution = 3600 * 900;
+
+    // @see https://www.mixxx.org/wiki/doku.php/midi_scripting#scratching_and_jog_wheels
+    var alpha = 1.0/8;
+    var beta = alpha/32;
+
+    engine.scratchEnable(deckNumber, resolution, 33 + 1/3, alpha, beta);
+}
+
+/**
+ * @param string group
+ */
+DenonSC3900.disableScratching = function (group) {
+    // @see https://www.mixxx.org/wiki/doku.php/midi_scripting#helper_functions
+    var deckNumber = script.deckFromGroup(group);
+
+    // disable scratch when enabled
+    engine.isScratching(deckNumber) && engine.scratchDisable(deckNumber);
+}
+
+// on playback indicator change
+DenonSC3900.playbackIndicatorListener = function (value, group) {
+    // Disable scratching when playback is ON.
+    // Enable scratching when playback is OFF.
+    // As there is no touch sensor on the SC3900 unit (only a rotation sensor),
+    // we only enable scratch when playback is stopped for normal MIDI mode.
     //
-    // 0x51
-    // 0x1A
-    // 0x1B
-    // 0x1C
+    // Turning the vinyl disc when playback is on would result in pitch bend,
+    // while turning it when playback is off would scratch.
     //
-    // The 0x51 address is containing the jog bend value, centered on 0x40 (64).
-    // I don't know what are representing the values of the other addresses.
-    // Such messages aren't documented in the manual. There is some doc about
-    // 14bit messages but the addresses written in the manual aren't matching
-    // the received data, so the manual may contain errors / be outdated.
+    // To have scratch during playback, you should connect the SC3900 unit
+    // with hybrid MIDI mode and use a DVS system to listen to the audio signal
+    // sent by the unit. In hybrid MIDI mode, the unit doesn't send MIDI
+    // messages for vinyl disc rotation.
+
+    value
+        ? DenonSC3900.disableScratching(group)
+        : DenonSC3900.enableScratching(group)
+    ;
+}
+
+/**
+ * @param string group
+ */
+DenonSC3900.attachPlaybackIndicatorIfNotAlreadyAttached = function (group) {
+    if (DenonSC3900.playbackIndicatorListenerRegistry.hasConnection(group)) {
+        return
+    }
+
+    var connection = engine.makeConnection(
+        group,
+        "play_indicator",
+        DenonSC3900.playbackIndicatorListener
+    );
+
+    DenonSC3900.playbackIndicatorListenerRegistry.setConnection(
+        group,
+        connection
+    );
+
+    connection.trigger();
+}
+
+// on jog wheel count change
+DenonSC3900.jogWheelCount = function (channel, control, value, status, group) {
+    DenonSC3900.jogWheelCountRegistry.setJogWheelCount(group, value);
+}
+
+// on jog wheel pulse MSB change
+DenonSC3900.jogWheelPulseMsb = function (channel, control, value, status, group) {
+    DenonSC3900.jogWheelPulseMsbRegistry.setJogWheelPulseMsb(group, value);
+}
+
+// on jog wheel pulse LSB change
+DenonSC3900.jogWheelPulseLsb = function (channel, control, value, status, group) {
+    DenonSC3900.attachPlaybackIndicatorIfNotAlreadyAttached(group)
+
+    var deckNumber = script.deckFromGroup(group);
+
+    engine.isScratching(deckNumber) // @see playbackIndicatorListener
+        ? DenonSC3900.jogWheelScratch(group, deckNumber, value)
+        : DenonSC3900.jogWheelPitchBend(group)
+    ;
+}
+
+/**
+ * @param string group
+ * @param number deckNumber
+ * @param number pulseLsb
+ */
+DenonSC3900.jogWheelScratch = function (group, deckNumber, pulseLsb) {
+    var jogBendValue = DenonSC3900.jogWheelCountRegistry.getJogWheelCount(group)
+    var direction = jogBendValue > 64
+        ? 1
+        : -1
+    ;
+
+    var jogBendIntensity = Math.abs(jogBendValue - 64)
+
+    var pulseMsb = DenonSC3900.jogWheelPulseMsbRegistry.getJogWheelPulseMsb(group)
+
+    var fullValue = (jogBendIntensity << 14) + (pulseMsb << 7) + pulseLsb;
+
+    // divide by 20 to reduce mixxx sensitivity
+    var finalValue = fullValue / 20;
+
+    engine.scratchTick(deckNumber, finalValue * direction);
+}
+
+/**
+ * @param string group
+ */
+DenonSC3900.jogWheelPitchBend = function (group) {
+    // The jog bend value is centered on 64 (0x40)
+    var jogBendValue = DenonSC3900.jogWheelCountRegistry.getJogWheelCount(group)
 
     // There are no message sent by the SC3900 unit when the jog wheel stops
     // (i.e. when the bend is centered again), which is normal because messages
@@ -413,11 +579,14 @@ DenonSC3900.jogWheel = function (channel, control, value, status, group) {
     // juxtaposing the center value as being the center value, as they are
     // always sent by the SC3900 unit when the jog wheel is stopping.
 
-    var shiftedValue = (63 === value || 65 === value)
+    var shiftedValue = (63 === jogBendValue || 65 === jogBendValue)
         ? 64
-        : value
+        : jogBendValue
     ;
 
-    // divide by 5 to reduce mixxx sensitivity
-    engine.setValue(group, "jog", (shiftedValue - 64) / 5);
+    var relativeValue = shiftedValue - 64;
+    // divide by 20 to reduce mixxx sensitivity
+    var finalValue = relativeValue / 20;
+
+    engine.setValue(group, "jog", finalValue);
 }

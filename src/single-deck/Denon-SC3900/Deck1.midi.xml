@@ -434,10 +434,30 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.jogWheel</key>
-                <description>Jog wheel (vinyl disc move in normal MIDI mode).</description>
+                <key>DenonSC3900.jogWheelCount</key>
+                <description>Jog wheel count.</description>
                 <status>0xB0</status>
                 <midino>0x51</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.jogWheelPulseMsb</key>
+                <description>Jog wheel pulse MSB.</description>
+                <status>0xB0</status>
+                <midino>0x1B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.jogWheelPulseLsb</key>
+                <description>Jog wheel pulse LSB.</description>
+                <status>0xB0</status>
+                <midino>0x1C</midino>
                 <options>
                     <script-binding/>
                 </options>
