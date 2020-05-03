@@ -1,0 +1,924 @@
+<?xml version='1.0' encoding='utf-8'?>
+<MixxxControllerPreset schemaVersion="1" mixxxVersion="2.2.3+">
+    <info>
+        <name>Denon SC3900 (Deck1 on Channel1)</name>
+        <author>Nicolas MURE</author>
+        <forums></forums>
+        <wiki>https://github.com/nm2107/mixxx-midi-mappings</wiki>
+    </info>
+    <controller id="SC3900-Deck1">
+        <scriptfiles>
+            <file functionprefix="DenonSC3900" filename="Denon-SC3900-scripts.js"/>
+        </scriptfiles>
+        <controls>
+            <control>
+                <group>[Channel1]</group>
+                <key>quantize</key>
+                <description>Toggle quantize on shift lock button press.</description>
+                <status>0x90</status>
+                <midino>0x71</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>reloop_toggle</key>
+                <description>EXIT/Reloop button press.</description>
+                <status>0x90</status>
+                <midino>0x40</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.hotcue1Press</key>
+                <description>Hotcue 1 button press.</description>
+                <status>0x90</status>
+                <midino>0x17</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.hotcue2Press</key>
+                <description>Hotcue 2 button press.</description>
+                <status>0x90</status>
+                <midino>0x18</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.hotcue3Press</key>
+                <description>Hotcue 3 button press.</description>
+                <status>0x90</status>
+                <midino>0x19</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.hotcue4Press</key>
+                <description>Hotcue 4 button press.</description>
+                <status>0x90</status>
+                <midino>0x20</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.hotcue5Press</key>
+                <description>Hotcue 1 (MIDIBANK2) button press.</description>
+                <status>0x90</status>
+                <midino>0x73</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.hotcue6Press</key>
+                <description>Hotcue 2 (MIDIBANK2) button press.</description>
+                <status>0x90</status>
+                <midino>0x74</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.hotcue7Press</key>
+                <description>Hotcue 3 (MIDIBANK2) button press.</description>
+                <status>0x90</status>
+                <midino>0x75</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.hotcue8Press</key>
+                <description>Hotcue 4 (MIDIBANK2) button press.</description>
+                <status>0x90</status>
+                <midino>0x76</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>eject</key>
+                <description>
+                    Eject the track on USB eject button press.
+                    The CD eject button has not been mapped to this feature as
+                    the SC3900 unit would actually try to eject the CD medium.
+                    The USB medium eject is however triggered by a
+                    press and hold gesture by the SC3900 unit. We can consider
+                    to use this button for mixxx mapping with a one shot press
+                    gesture as it won't eject the USB medium.
+                </description>
+                <status>0x90</status>
+                <midino>0x72</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.syncButtonPress</key>
+                <description>SYNC button press.</description>
+                <status>0x90</status>
+                <midino>0x6B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.syncButtonRelease</key>
+                <description>SYNC button release.</description>
+                <status>0x80</status>
+                <midino>0x6B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>reverse</key>
+                <description>Reverse playback on reverse button press.</description>
+                <status>0x90</status>
+                <midino>0x46</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>reverse</key>
+                <description>Resume playback in forward direction on reverse button release.</description>
+                <status>0x80</status>
+                <midino>0x46</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>loop_in</key>
+                <description>Tell loop in point to follow cursor on A button press.</description>
+                <status>0x90</status>
+                <midino>0x37</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>loop_in</key>
+                <description>Set loop in point on A button release.</description>
+                <status>0x80</status>
+                <midino>0x37</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>loop_out</key>
+                <description>Tell loop out point to follow cursor on B button press.</description>
+                <status>0x90</status>
+                <midino>0x39</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>loop_out</key>
+                <description>Set loop out point on B button release.</description>
+                <status>0x80</status>
+                <midino>0x39</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>loop_halve</key>
+                <description>Halve loop size on loop - button press.</description>
+                <status>0x90</status>
+                <midino>0x69</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>loop_double</key>
+                <description>Double loop size on loop + button press.</description>
+                <status>0x90</status>
+                <midino>0x6A</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>beatloop_activate</key>
+                <description>AUTO LOOP button press.</description>
+                <status>0x90</status>
+                <midino>0x1D</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>beatloop_activate</key>
+                <description>AUTO LOOP button release.</description>
+                <status>0x80</status>
+                <midino>0x1D</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>keylock</key>
+                <description>Toggle key lock on KEY ADJUST button press.</description>
+                <status>0x90</status>
+                <midino>0x06</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>cue_default</key>
+                <description>Stop CUE playback on CUE button release and get back to CUE point.</description>
+                <status>0x80</status>
+                <midino>0x42</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>cue_default</key>
+                <description>
+                    On CUE button press : set CUE point when not on a CUE point,
+                    or start CUE playback when on a CUE point.
+                </description>
+                <status>0x90</status>
+                <midino>0x42</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>play</key>
+                <description>Play button press.</description>
+                <status>0x90</status>
+                <midino>0x43</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>reverseroll</key>
+                <description>Start slip playback on DUMP button press.</description>
+                <status>0x90</status>
+                <midino>0x45</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>reverseroll</key>
+                <description>Stop slip playback on DUMP button release.</description>
+                <status>0x80</status>
+                <midino>0x45</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>rate_temp_down</key>
+                <description>Start negative pitch bend on pitch bend - button press.</description>
+                <status>0x90</status>
+                <midino>0x09</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>rate_temp_down</key>
+                <description>Stop negative pitch bend on pitch bend - button release.</description>
+                <status>0x80</status>
+                <midino>0x09</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>rate_temp_up</key>
+                <description>Start positive pitch bend on pitch bend + button press.</description>
+                <status>0x90</status>
+                <midino>0x08</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>rate_temp_up</key>
+                <description>Stop positive pitch bend on pitch bend + button release.</description>
+                <status>0x80</status>
+                <midino>0x08</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>bpm_tap</key>
+                <description>TAP button press.</description>
+                <status>0x90</status>
+                <midino>0x07</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Library]</group>
+                <key>MoveUp</key>
+                <description>Rotate SELECT knob counter clock wise : move up selection.</description>
+                <status>0xB0</status>
+                <midino>0x54</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Library]</group>
+                <key>MoveDown</key>
+                <description>Rotate SELECT knob clock wise : move down selection.</description>
+                <status>0xB0</status>
+                <midino>0x54</midino>
+                <options>
+                    <invert/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>LoadSelectedTrack</key>
+                <description>SELECT knob press.</description>
+                <status>0x90</status>
+                <midino>0x28</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Library]</group>
+                <key>MoveFocusBackward</key>
+                <description>Move focused area backward on BACK button press.</description>
+                <status>0x90</status>
+                <midino>0x30</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Library]</group>
+                <key>MoveFocusForward</key>
+                <description>Move focused area forward on FWD button press.</description>
+                <status>0x90</status>
+                <midino>0x29</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.pitchFaderMsb</key>
+                <description>Pitch slider MSB.</description>
+                <status>0xB0</status>
+                <midino>0x7A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.pitchFaderLsb</key>
+                <description>Pitch slider LSB.</description>
+                <status>0xB0</status>
+                <midino>0x7B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.jogWheelCount</key>
+                <description>Jog wheel count.</description>
+                <status>0xB0</status>
+                <midino>0x51</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.jogWheelPulseMsb</key>
+                <description>Jog wheel pulse MSB.</description>
+                <status>0xB0</status>
+                <midino>0x1B</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.jogWheelPulseLsb</key>
+                <description>Jog wheel pulse LSB.</description>
+                <status>0xB0</status>
+                <midino>0x1C</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>beatjump_backward</key>
+                <description>Fast search - button press.</description>
+                <status>0x90</status>
+                <midino>0x11</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>beatjump_backward</key>
+                <description>Fast search - button release.</description>
+                <status>0x80</status>
+                <midino>0x11</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>beatjump_forward</key>
+                <description>Fast search + button press.</description>
+                <status>0x90</status>
+                <midino>0x10</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>beatjump_forward</key>
+                <description>Fast search + button release.</description>
+                <status>0x80</status>
+                <midino>0x10</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>repeat</key>
+                <description>Toggle track repeat mode on SINGLE/CONT. button press.</description>
+                <status>0x90</status>
+                <midino>0x26</midino>
+                <options>
+                    <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.midiBankSwitch</key>
+                <description>MIDI BANK button release.</description>
+                <status>0x80</status>
+                <midino>0x77</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.clrButtonPress</key>
+                <description>CLR button press.</description>
+                <status>0x90</status>
+                <midino>0x1A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.clrButtonRelease</key>
+                <description>CLR button release.</description>
+                <status>0x80</status>
+                <midino>0x1A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+        </controls>
+        <outputs>
+            <output>
+                <group>[Channel1]</group>
+                <key>quantize</key>
+                <description>Light on shift lock LED when quantize is enabled.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x59</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>quantize</key>
+                <description>Light off shift lock LED when quantize is disabled.</description>
+                <status>0xB0</status>
+                <midino>0x4B</midino>
+                <on>0x59</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>slip_enabled</key>
+                <description>Light on DUMP button when slip playback mode is on.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x29</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>slip_enabled</key>
+                <description>Light off DUMP button when slip playback mode is off.</description>
+                <status>0xB0</status>
+                <midino>0x4B</midino>
+                <on>0x29</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_1_enabled</key>
+                <description>Turn on hotcue 1 dimmer light.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x12</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_2_enabled</key>
+                <description>Turn on hotcue 2 dimmer light.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x14</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_3_enabled</key>
+                <description>Turn on hotcue 3 dimmer light.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x16</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_4_enabled</key>
+                <description>Turn on hotcue 4 dimmer light.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x18</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_5_enabled</key>
+                <description>Turn on hotcue 1 (MIDIBANK2) dimmer light.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x32</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_6_enabled</key>
+                <description>Turn on hotcue 2 (MIDIBANK2) dimmer light.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x34</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_7_enabled</key>
+                <description>Turn on hotcue 3 (MIDIBANK2) dimmer light.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x36</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_8_enabled</key>
+                <description>Turn on hotcue 4 (MIDIBANK2) dimmer light.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x38</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_1_enabled</key>
+                <description>Turn on hotcue 1 light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x11</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_2_enabled</key>
+                <description>Turn on hotcue 2 light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x13</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_3_enabled</key>
+                <description>Turn on hotcue 3 light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x15</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_4_enabled</key>
+                <description>Turn on hotcue 4 light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x17</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_5_enabled</key>
+                <description>Turn on hotcue 1 (MIDIBANK2) light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x31</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_6_enabled</key>
+                <description>Turn on hotcue 2 (MIDIBANK2) light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x33</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_7_enabled</key>
+                <description>Turn on hotcue 3 (MIDIBANK2) light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x35</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>hotcue_8_enabled</key>
+                <description>Turn on hotcue 4 (MIDIBANK2) light when set.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x37</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>sync_enabled</key>
+                <description>Light on SYNC button when sync is enabled on this deck.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x52</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>sync_enabled</key>
+                <description>Light off SYNC button when sync is disabled on this deck.</description>
+                <status>0xB0</status>
+                <midino>0x4B</midino>
+                <on>0x52</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>reverse</key>
+                <description>Light on reverse button when playback is in reverse direction.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x3A</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>reverse</key>
+                <description>Light off reverse button when playback is not in reverse direction.</description>
+                <status>0xB0</status>
+                <midino>0x4B</midino>
+                <on>0x3A</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>loop_in</key>
+                <description>Blink A button when loop in point is active.</description>
+                <status>0xB0</status>
+                <midino>0x4C</midino>
+                <on>0x24</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>loop_enabled</key>
+                <description>Blink A button when loop is active.</description>
+                <status>0xB0</status>
+                <midino>0x4C</midino>
+                <on>0x24</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>loop_enabled</key>
+                <description>Blink B button when loop is active.</description>
+                <status>0xB0</status>
+                <midino>0x4C</midino>
+                <on>0x40</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>loop_enabled</key>
+                <description>Light on AUTO LOOP button when loop is active.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x2B</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>loop_enabled</key>
+                <description>Light off AUTO LOOP button when loop is not active.</description>
+                <status>0xB0</status>
+                <midino>0x4B</midino>
+                <on>0x2B</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>loop_enabled</key>
+                <description>Light on A button dimmer light when loop is not active.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x3E</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>loop_enabled</key>
+                <description>Light on B button dimmer light when loop is not active.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x2A</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>end_of_track</key>
+                <description>Blink SELECT knob light when reached end of track zone.</description>
+                <status>0xB0</status>
+                <midino>0x4C</midino>
+                <on>0x1E</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>end_of_track</key>
+                <description>Turn on SELECT knob light when not in end of track zone.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x1E</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>cue_default</key>
+                <description>
+                    Light on CUE button when the CUE playback is enabled
+                    (CDJ CUE hold down style).
+                </description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x26</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>cue_default</key>
+                <description>
+                    Blink CUE button when not on a CUE point and when not being
+                    in a CUE playback.
+                </description>
+                <status>0xB0</status>
+                <midino>0x4C</midino>
+                <on>0x26</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>play_indicator</key>
+                <description>Light on play button on playback.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x27</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>play_indicator</key>
+                <description>Blink play button on track pause.</description>
+                <status>0xB0</status>
+                <midino>0x4C</midino>
+                <on>0x27</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>play_indicator</key>
+                <description>Light on CUE button on playback.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x26</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>play_indicator</key>
+                <description>Blink CUE button on track pause.</description>
+                <status>0xB0</status>
+                <midino>0x4C</midino>
+                <on>0x26</on>
+                <maximum>0</maximum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>keylock</key>
+                <description>Light on KEY ADJUST LED when keylock is enabled.</description>
+                <status>0xB0</status>
+                <midino>0x4A</midino>
+                <on>0x08</on>
+                <minimum>1</minimum>
+            </output>
+            <output>
+                <group>[Channel1]</group>
+                <key>keylock</key>
+                <description>Light off KEY ADJUST LED when keylock is disabled.</description>
+                <status>0xB0</status>
+                <midino>0x4B</midino>
+                <on>0x08</on>
+                <maximum>0</maximum>
+            </output>
+        </outputs>
+    </controller>
+</MixxxControllerPreset>
