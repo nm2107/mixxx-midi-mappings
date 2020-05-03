@@ -415,7 +415,7 @@
             <control>
                 <group>[Channel1]</group>
                 <key>rate</key>
-                <description>Pitch slider MSB.</description>
+                <description>Pitch slider.</description>
                 <status>0xB0</status>
                 <midino>0x7A</midino>
                 <options>
