@@ -92,6 +92,30 @@ DenonSC3900.getHotcuesCount = function () {
     return Object.keys(DenonSC3900.HOTCUES_WRITE_ADDRESSES).length
 }
 
+/**
+ * @param string group
+ * @param int hotcueNumber
+ *
+ * @return bool
+ */
+DenonSC3900.isHotcueSet = function (group, hotcueNumber) {
+    var valueName = "hotcue_" + hotcueNumber + "_position";
+
+    return -1 !== engine.getValue(group, settingName);
+}
+
+/**
+ * @param string group
+ * @param int hotcueNumber
+ *
+ * @return bool
+ */
+DenonSC3900.isHotcueSetAndPlaybackDisabled = function (group, hotcueNumber) {
+    return DenonSC3900.isHotcueSet(group, hotcueNumber)
+        && !engine.getValue(group, "play_indicator")
+    ;
+}
+
 // #############################################################################
 // ## Registries
 // #############################################################################
@@ -233,11 +257,7 @@ DenonSC3900.shutdown = function () {
  */
 DenonSC3900.renderHotcuesLights = function (outputChannel, group) {
     for (var i = 1; i <= DenonSC3900.getHotcuesCount(); i++) {
-        var settingName = "hotcue_" + i + "_position";
-
-        var isHotcueSet = -1 !== engine.getValue(group, settingName)
-
-        var destinationAddress = isHotcueSet
+        var destinationAddress = DenonSC3900.isHotcueSet(group, i)
             ? DenonSC3900.HOTCUES_WRITE_ADDRESSES[i]["light"]
             : DenonSC3900.HOTCUES_WRITE_ADDRESSES[i]["dimmer"]
         ;
@@ -271,7 +291,9 @@ DenonSC3900.clrButtonRelease = function (channel, control, value, status, group)
 DenonSC3900.hotcuePress = function (group, hotcueNumber) {
     var action = DenonSC3900.clrButtonRegistry.isPressed(group)
         ? "clear"
-        : "activate"
+        : DenonSC3900.isHotcueSetAndPlaybackDisabled(group, hotcueNumber)
+            ? "goto"
+            : "activate"
     ;
 
     var valueName = "hotcue_" + hotcueNumber + "_" + action;
