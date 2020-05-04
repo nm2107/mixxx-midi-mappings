@@ -33,6 +33,16 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>DenonSC3900.vinylButtonPress</key>
+                <description>Vinyl button press.</description>
+                <status>0x90</status>
+                <midino>0x04</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>DenonSC3900.hotcue1Press</key>
                 <description>Hotcue 1 button press.</description>
                 <status>0x90</status>
