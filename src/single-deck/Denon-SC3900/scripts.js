@@ -112,8 +112,17 @@ DenonSC3900.isHotcueSet = function (group, hotcueNumber) {
  */
 DenonSC3900.isHotcueSetAndPlaybackDisabled = function (group, hotcueNumber) {
     return DenonSC3900.isHotcueSet(group, hotcueNumber)
-        && !engine.getValue(group, "play_indicator")
+        && !DenonSC3900.isPlaying(group)
     ;
+}
+
+/**
+ * @param string group
+ *
+ * @return bool
+ */
+DenonSC3900.isPlaying = function (group) {
+    return engine.getValue(group, "play_indicator");
 }
 
 // #############################################################################
@@ -199,25 +208,6 @@ DenonSC3900.createPitchFaderMsbRegistry = function () {
 }
 
 DenonSC3900.pitchFaderMsbRegistry = DenonSC3900.createPitchFaderMsbRegistry()
-
-/**
- * Constructor for a registry which would hold the connections listening to
- * playback indicator changes.
- */
-DenonSC3900.createPlaybackIndicatorListenerRegistry = function () {
-    var registry = {}
-
-    return {
-        setConnection: function (group, connection) {
-            registry[group] = connection;
-        },
-        hasConnection: function (group) {
-            return undefined !== registry[group];
-        }
-    }
-}
-
-DenonSC3900.playbackIndicatorListenerRegistry = DenonSC3900.createPlaybackIndicatorListenerRegistry()
 
 /**
  * Constructor for a registry which would hold the jog wheel count
@@ -452,6 +442,10 @@ DenonSC3900.pitchFaderLsb = function (channel, control, value, status, group) {
 DenonSC3900.enableScratching = function (group) {
     var deckNumber = script.deckFromGroup(group);
 
+    if (engine.isScratching(deckNumber)) {
+        return
+    }
+
     // The SC3900 unit sends 3600 messages per resolution for the jogWheelCount
     // value, and 900 per resolution messages for the jogWheelPulseMsb and
     // jogWheelPulseLsb, which makes a total amount of 3600 * 900 messages
@@ -476,49 +470,6 @@ DenonSC3900.disableScratching = function (group) {
     engine.isScratching(deckNumber) && engine.scratchDisable(deckNumber);
 }
 
-// on playback indicator change
-DenonSC3900.playbackIndicatorListener = function (value, group) {
-    // Disable scratching when playback is ON.
-    // Enable scratching when playback is OFF.
-    // As there is no touch sensor on the SC3900 unit (only a rotation sensor),
-    // we only enable scratch when playback is stopped for normal MIDI mode.
-    //
-    // Turning the vinyl disc when playback is on would result in pitch bend,
-    // while turning it when playback is off would scratch.
-    //
-    // To have scratch during playback, you should connect the SC3900 unit
-    // with hybrid MIDI mode and use a DVS system to listen to the audio signal
-    // sent by the unit. In hybrid MIDI mode, the unit doesn't send MIDI
-    // messages for vinyl disc rotation.
-
-    value
-        ? DenonSC3900.disableScratching(group)
-        : DenonSC3900.enableScratching(group)
-    ;
-}
-
-/**
- * @param string group
- */
-DenonSC3900.attachPlaybackIndicatorIfNotAlreadyAttached = function (group) {
-    if (DenonSC3900.playbackIndicatorListenerRegistry.hasConnection(group)) {
-        return
-    }
-
-    var connection = engine.makeConnection(
-        group,
-        "play_indicator",
-        DenonSC3900.playbackIndicatorListener
-    );
-
-    DenonSC3900.playbackIndicatorListenerRegistry.setConnection(
-        group,
-        connection
-    );
-
-    connection.trigger();
-}
-
 // on jog wheel count change
 DenonSC3900.jogWheelCount = function (channel, control, value, status, group) {
     DenonSC3900.jogWheelCountRegistry.setJogWheelCount(group, value);
@@ -531,11 +482,9 @@ DenonSC3900.jogWheelPulseMsb = function (channel, control, value, status, group)
 
 // on jog wheel pulse LSB change
 DenonSC3900.jogWheelPulseLsb = function (channel, control, value, status, group) {
-    DenonSC3900.attachPlaybackIndicatorIfNotAlreadyAttached(group)
-
     var deckNumber = script.deckFromGroup(group);
 
-    engine.isScratching(deckNumber) // @see playbackIndicatorListener
+    engine.isScratching(deckNumber)
         ? DenonSC3900.jogWheelScratch(group, deckNumber, value)
         : DenonSC3900.jogWheelPitchBend(group)
     ;
@@ -589,4 +538,60 @@ DenonSC3900.jogWheelPitchBend = function (group) {
     var finalValue = relativeValue / 20;
 
     engine.setValue(group, "jog", finalValue);
+}
+
+// #############################################################################
+// ## CUE management
+// #############################################################################
+
+// on CUE button press
+DenonSC3900.cueButtonPress = function (channel, control, value, status, group) {
+    DenonSC3900.disableScratching(group);
+
+    engine.setValue(group, "cue_default", true);
+
+    var deckNumber = script.deckFromGroup(group);
+
+    // Add a timer to enble again the `cue_default` setting when the CUE button
+    // is pressed. The first enable above is not enough alone (I think it's
+    // because of the scratch mode still being enabled in the background), so
+    // we add a timer to enable the `cue_default` when the scratch mode is
+    // disabled.
+    // The strange thing is that enabling the `cue_default` setting in the timer
+    // function only is not enough. We have to keep the two calls to enable the
+    // `cue_default` (the one above and the one in the timer).
+    var timerId = engine.beginTimer(
+        Math.min(20, engine.getValue("[Master]", "latency")),
+        function () {
+            if (!engine.isScratching(deckNumber)) {
+                engine.setValue(group, "cue_default", true);
+
+                engine.stopTimer(timerId);
+            }
+        },
+        false
+    );
+}
+
+// on CUE button release
+DenonSC3900.cueButtonRelease = function (channel, control, value, status, group) {
+    engine.setValue(group, "cue_default", false);
+
+    DenonSC3900.enableScratching(group);
+}
+
+// #############################################################################
+// ## Play management
+// #############################################################################
+
+DenonSC3900.playButtonPress = function (channel, control, value, status, group) {
+    if (DenonSC3900.isPlaying(group)) {
+        engine.setValue(group, "play", false);
+
+        DenonSC3900.enableScratching(group);
+    } else {
+        DenonSC3900.disableScratching(group);
+
+        engine.setValue(group, "play", true);
+    }
 }

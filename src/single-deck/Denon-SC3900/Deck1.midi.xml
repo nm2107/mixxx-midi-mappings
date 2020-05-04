@@ -261,17 +261,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>cue_default</key>
-                <description>Stop CUE playback on CUE button release and get back to CUE point.</description>
-                <status>0x80</status>
-                <midino>0x42</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>cue_default</key>
+                <key>DenonSC3900.cueButtonPress</key>
                 <description>
                     On CUE button press : set CUE point when not on a CUE point,
                     or start CUE playback when on a CUE point.
@@ -279,17 +269,27 @@
                 <status>0x90</status>
                 <midino>0x42</midino>
                 <options>
-                    <normal/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>play</key>
+                <key>DenonSC3900.cueButtonRelease</key>
+                <description>Stop CUE playback on CUE button release and get back to CUE point.</description>
+                <status>0x80</status>
+                <midino>0x42</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.playButtonPress</key>
                 <description>Play button press.</description>
                 <status>0x90</status>
                 <midino>0x43</midino>
                 <options>
-                    <normal/>
+                    <script-binding/>
                 </options>
             </control>
             <control>
