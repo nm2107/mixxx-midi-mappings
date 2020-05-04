@@ -26,6 +26,7 @@ mixxx.
 
 Here are the features available in both normal and hybrid MIDI modes :
 
+- 33 1/3 RPM platter (you can edit the `.js` file to change it to 45 RPM)
 - Track eject (mapped on the USB eject button as the disc eject button would
 attempt to eject the CD medium when pressed)
 - Auto loop (aka beatgrid loop)
