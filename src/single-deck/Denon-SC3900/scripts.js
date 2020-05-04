@@ -50,6 +50,7 @@ DenonSC3900.CUE_WRITE_ADDRESS = 0x26
 DenonSC3900.PLAY_WRITE_ADDRESS = 0x27
 DenonSC3900.SYNC_WRITE_ADDRESS = 0x52
 DenonSC3900.KEY_ADJUST_WRITE_ADDRESS = 0x08
+DenonSC3900.VINYL_WRITE_ADDRESS = 0x06
 DenonSC3900.DUMP_WRITE_ADDRESS = 0x29
 DenonSC3900.SHIFT_LOCK_WRITE_ADDRESS = 0x59
 DenonSC3900.SELECT_WRITE_ADDRESS = 0x1E
@@ -247,6 +248,55 @@ DenonSC3900.createJogWheelPulseMsbRegistry = function () {
 
 DenonSC3900.jogWheelPulseMsbRegistry = DenonSC3900.createJogWheelPulseMsbRegistry()
 
+/**
+ * Constructor for a registry which would indicate whether the vinyl mode is
+ * activated or not.
+ */
+DenonSC3900.createVinylModeRegistry = function () {
+    var registry = {}
+
+    return {
+        toggleVinylMode: function (group) {
+            // As the VINYL led is ON when connecting the SC3900 unit in MIDI,
+            // `undefined` should be considered as a positive value.
+            var currentValue = undefined === registry[group] || true === registry[group]
+
+            registry[group] = !currentValue;
+        },
+        isVinylModeActivated: function (group) {
+            // Should be activated by default as the VINYL led is ON when
+            // connecting the SC3900 unit.
+            return undefined === registry[group] || true === registry[group];
+        }
+    }
+}
+
+DenonSC3900.vinylModeRegistry = DenonSC3900.createVinylModeRegistry();
+
+// #############################################################################
+// ## Shutdown management
+// #############################################################################
+
+// on deck init
+DenonSC3900.init = function () {
+    // As we don't have the channel information for the SC3900 decks during
+    // init or shutdown functions, we blindly assume that all the mixxx decks
+    // are SC3900.
+    //
+    // @FIXME this blind behavior is dangerous !
+    //
+    // When connecting a deck to mixxx, make sure that the LED controlled via
+    // listeners in this script as reflecting this script state.
+
+    for (var channel = 0; channel < DenonSC3900.getDecksCount(); channel++) {
+        midi.sendShortMsg(
+            DenonSC3900.getOutputMidiChannel(channel),
+            DenonSC3900.LIGHT_ON,
+            DenonSC3900.VINYL_WRITE_ADDRESS
+        );
+    }
+}
+
 // #############################################################################
 // ## Shutdown management
 // #############################################################################
@@ -272,16 +322,20 @@ DenonSC3900.resetLightsToNormalMidiModeDefault = function (outputChannel) {
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.PLAY_WRITE_ADDRESS);
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.SYNC_WRITE_ADDRESS);
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.KEY_ADJUST_WRITE_ADDRESS);
+    // vinyl mode LED is ON when connecting the SC3900 unit
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_ON, DenonSC3900.VINYL_WRITE_ADDRESS);
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.DUMP_WRITE_ADDRESS);
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.SHIFT_LOCK_WRITE_ADDRESS);
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.SELECT_WRITE_ADDRESS);
 }
 
-// on mixxx shutdown
+// on deck shutdown
 DenonSC3900.shutdown = function () {
     // As we don't have the channel information for the SC3900 decks during
     // init or shutdown functions, we blindly assume that all the mixxx decks
-    // are SC3900.
+    // are SC3900s, and that we're only shutting down a deck on mixxx exit.
+    //
+    // @FIXME this blind behavior is dangerous !
     //
     // When leaving mixxx, we set back the SC3900 lights to their default
     // values (i.e. as how they are when we connect the deck for the first time
@@ -584,6 +638,7 @@ DenonSC3900.cueButtonRelease = function (channel, control, value, status, group)
 // ## Play management
 // #############################################################################
 
+// on Play/Pause button press
 DenonSC3900.playButtonPress = function (channel, control, value, status, group) {
     if (DenonSC3900.isPlaying(group)) {
         engine.setValue(group, "play", false);
@@ -594,4 +649,24 @@ DenonSC3900.playButtonPress = function (channel, control, value, status, group) 
 
         engine.setValue(group, "play", true);
     }
+}
+
+// #############################################################################
+// ## Vinyl mode management
+// #############################################################################
+
+// on VINYL button press
+DenonSC3900.vinylButtonPress = function (channel, control, value, status, group) {
+    DenonSC3900.vinylModeRegistry.toggleVinylMode(group);
+
+    lightStatus = DenonSC3900.vinylModeRegistry.isVinylModeActivated(group)
+        ? DenonSC3900.LIGHT_ON
+        : DenonSC3900.LIGHT_OFF
+    ;
+
+    midi.sendShortMsg(
+        DenonSC3900.getOutputMidiChannel(channel),
+        lightStatus,
+        DenonSC3900.VINYL_WRITE_ADDRESS
+    );
 }
