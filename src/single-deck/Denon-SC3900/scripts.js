@@ -1,5 +1,7 @@
 // @see https://www.mixxx.org/wiki/doku.php/midi_scripting
 
+// Script written using a DenonSC3900 deck with firmware version 1168.
+// @see https://denondjforum.com/t/attention-sc3900-software-sys-1168-nov-2014/112
 function DenonSC3900 () {}
 
 // @see Denon SC3900 manual for hex values, on page 34.
@@ -55,6 +57,13 @@ DenonSC3900.DUMP_WRITE_ADDRESS = 0x29
 DenonSC3900.SHIFT_LOCK_WRITE_ADDRESS = 0x59
 DenonSC3900.SELECT_WRITE_ADDRESS = 0x1E
 
+// You may change this value to increase the sensibility of the jog wheel when
+// used for pitch bending.
+// > 1 : more sensible
+// < 1 : less sensible
+// Should be a positive number.
+DenonSC3900.JOG_WHEEL_PITCH_BEND_SENSIBILITY = 1.0;
+
 // The platter control is not described in the Denon manual.
 // This address has been grabbed from :
 // https://github.com/matthias-johnson/SC3900/blob/d63aaf89f08d1e2d5ffe9042e22adf28a0a27f36/SC3900-scripts.js#L54
@@ -66,6 +75,27 @@ DenonSC3900.PLATTER_ROTATE = 0x7F
 DenonSC3900.PLATTER_STOP = 0x00
 // You may change this value to 45 if your SC3900 unit is set to have 45 RPM.
 DenonSC3900.PLATTER_RPM = 33 + 1/3;
+DenonSC3900.PLATTER_STATE_TRANSITION_DURATION_MS = 400; // no matter RPM rate
+// When moving at normal speed (pitch 0), this is the amount of pulses that the
+// SC3900 is internally effecting. As described in the Denon manual.
+DenonSC3900.PLATTER_PULSES_COUNT_PER_REVOLUTION = 900;
+// When moving at tiny speed, this is the amount of pulses that the SC3900 is
+// internally effecting. As described in the Denon manual.
+DenonSC3900.PLATTER_TINY_MOVEMENT_PULSES_COUNT_PER_REVOLUTION = 3600;
+
+// The duration of a revolution, at normal speed (pitch 0) in µs.
+// We use the µs unit as the S3900 deck is sending us data in this unit.
+DenonSC3900.PLATTER_REVOLUTION_WIDTH =
+    // duration of a revolution, in seconds
+    (60 / DenonSC3900.PLATTER_RPM)
+    // convert it to µs
+    * 1000000
+;
+// The duration between two pulses, at normal speed (pitch 0), in µs.
+// We use the µs unit as the S3900 deck is sending us data in this unit.
+DenonSC3900.PLATTER_PULSE_WIDTH = DenonSC3900.PLATTER_REVOLUTION_WIDTH
+    / DenonSC3900.PLATTER_PULSES_COUNT_PER_REVOLUTION
+;
 
 DenonSC3900.LONG_PRESS_THRESHOLD_MS = 500;
 
@@ -140,16 +170,6 @@ DenonSC3900.isPlaying = function (group) {
             || engine.getValue(group, "play")
         )
         && !engine.getValue(group, "cue_default")
-    ;
-}
-
-/**
- * @return int
- */
-DenonSC3900.getPlatterStateTransitionDurationMs = function () {
-    return 45 === DenonSC3900.PLATTER_RPM
-        ? 500
-        : 300
     ;
 }
 
@@ -238,42 +258,61 @@ DenonSC3900.createPitchFaderMsbRegistry = function () {
 DenonSC3900.pitchFaderMsbRegistry = DenonSC3900.createPitchFaderMsbRegistry()
 
 /**
- * Constructor for a registry which would hold the jog wheel count
+ * Constructor for a registry which would hold the jog wheel bend
  * (used for jog wheel pitch bend and to know scratch direction).
  */
-DenonSC3900.createJogWheelCountRegistry = function () {
+DenonSC3900.createJogWheelBendRegistry = function () {
     var registry = {}
 
     return {
-        setJogWheelCount: function (group, value) {
+        setJogWheelBend: function (group, value) {
             registry[group] = value;
         },
-        getJogWheelCount: function (group) {
+        getJogWheelBend: function (group) {
             return registry[group];
         }
     }
 }
 
-DenonSC3900.jogWheelCountRegistry = DenonSC3900.createJogWheelCountRegistry()
+DenonSC3900.jogWheelBendRegistry = DenonSC3900.createJogWheelBendRegistry()
 
 /**
- * Constructor for a registry which would hold the jog wheel pulse MSB
+ * Constructor for a registry which would hold the jog wheel pulse width MSB
  * (used for scratch ticks computing).
  */
-DenonSC3900.createJogWheelPulseMsbRegistry = function () {
+DenonSC3900.createJogWheelPulseWidthMsbRegistry = function () {
     var registry = {}
 
     return {
-        setJogWheelPulseMsb: function (group, value) {
+        setJogWheelPulseWidthMsb: function (group, value) {
             registry[group] = value;
         },
-        getJogWheelPulseMsb: function (group) {
+        getJogWheelPulseWidthMsb: function (group) {
             return registry[group];
         }
     }
 }
 
-DenonSC3900.jogWheelPulseMsbRegistry = DenonSC3900.createJogWheelPulseMsbRegistry()
+DenonSC3900.jogWheelPulseWidthMsbRegistry = DenonSC3900.createJogWheelPulseWidthMsbRegistry()
+
+/**
+ * Constructor for a registry which would hold the walked pulses when the
+ * jog wheel is moved by tiny movements.
+ */
+DenonSC3900.createJogWheelTinyMovementWalkedPulsesRegistry = function () {
+    var registry = {}
+
+    return {
+        setJogWheelTinyMovementWalkedPulses: function (group, value) {
+            registry[group] = value;
+        },
+        getJogWheelTinyMovementWalkedPulses: function (group) {
+            return registry[group];
+        }
+    }
+}
+
+DenonSC3900.jogWheelTinyMovementWalkedPulsesRegistry = DenonSC3900.createJogWheelTinyMovementWalkedPulsesRegistry()
 
 /**
  * Constructor for a registry which would indicate whether the vinyl mode is
@@ -533,6 +572,7 @@ DenonSC3900.pitchFaderLsb = function (channel, control, value, status, group) {
     // When fullValue == 8192 (middle), the pitch fader is at the center position.
     // When fullValue == 16383 (max), the pitch fader is at the bottom position.
 
+    // rate [-1; 1]
     var rate = (fullValue - 8192) / 8192;
 
     // Somehow mixxx is inverting the rate (i.e. the positive pitch area is
@@ -549,44 +589,19 @@ DenonSC3900.pitchFaderLsb = function (channel, control, value, status, group) {
  * @param string group
  */
 DenonSC3900.enableScratching = function (group) {
-    var deckNumber = script.deckFromGroup(group);
-
-    if (engine.isScratching(deckNumber)) {
-        return
-    }
-
-    // The SC3900 unit sends 3600 messages per resolution for the jogWheelCount
-    // value, and 900 per resolution messages for the jogWheelPulseMsb and
-    // jogWheelPulseLsb, which makes a total amount of 3600 * 900 messages
-    // sent per resolution (c.f. Denon SC3900 manual).
-    var resolution = 3600 * 900;
-
-    // @see https://www.mixxx.org/wiki/doku.php/midi_scripting#scratching_and_jog_wheels
-    var alpha = 1.0/8;
-    var beta = alpha/32;
-
-    engine.scratchEnable(
-        deckNumber,
-        resolution,
-        DenonSC3900.PLATTER_RPM,
-        alpha,
-        beta
-    );
+    engine.setValue(group, "scratch2_enable", true);
 }
 
 /**
  * @param string group
  */
 DenonSC3900.disableScratching = function (group) {
-    // @see https://www.mixxx.org/wiki/doku.php/midi_scripting#helper_functions
-    var deckNumber = script.deckFromGroup(group);
-
-    // disable scratch when enabled
-    engine.isScratching(deckNumber) && engine.scratchDisable(deckNumber);
+    engine.setValue(group, "scratch2_enable", false);
 }
 
 /**
- * Whether to enable or disable mixxx scratching engine.
+ * Whether to enable or disable mixxx scratching engine, in function of
+ * the deck state.
  *
  * @param string group
  */
@@ -603,18 +618,25 @@ DenonSC3900.updateScratchingStatus = function (group) {
     ;
 }
 
-// on jog wheel count change
-DenonSC3900.jogWheelCount = function (channel, control, value, status, group) {
-    DenonSC3900.jogWheelCountRegistry.setJogWheelCount(group, value);
+// on jog wheel bend change
+DenonSC3900.jogWheelBend = function (channel, control, value, status, group) {
+    DenonSC3900.jogWheelBendRegistry.setJogWheelBend(group, value);
 }
 
-// on jog wheel pulse MSB change
-DenonSC3900.jogWheelPulseMsb = function (channel, control, value, status, group) {
-    DenonSC3900.jogWheelPulseMsbRegistry.setJogWheelPulseMsb(group, value);
+// on jog wheel tiny movement walked pulses change
+DenonSC3900.jogWheelTinyMovementWalkedPulses = function (channel, control, value, status, group) {
+    DenonSC3900.jogWheelTinyMovementWalkedPulsesRegistry
+        .setJogWheelTinyMovementWalkedPulses(group, value)
+    ;
 }
 
-// on jog wheel pulse LSB change
-DenonSC3900.jogWheelPulseLsb = function (channel, control, value, status, group) {
+// on jog wheel pulse width MSB change
+DenonSC3900.jogWheelPulseWidthMsb = function (channel, control, value, status, group) {
+    DenonSC3900.jogWheelPulseWidthMsbRegistry.setJogWheelPulseWidthMsb(group, value);
+}
+
+// on jog wheel pulse width LSB change
+DenonSC3900.jogWheelPulseWidthLsb = function (channel, control, value, status, group) {
     if (DenonSC3900.dropJogWheelMidiSignalsRegistry.shouldDrop(group)) {
         // Ignore the wheel signal. The platter is probably changing its
         // state while playback is on, so we should not consider the slowing
@@ -634,25 +656,72 @@ DenonSC3900.jogWheelPulseLsb = function (channel, control, value, status, group)
 /**
  * @param string group
  * @param number deckNumber
- * @param number pulseLsb
+ * @param number pulseWidthLsb
  */
-DenonSC3900.jogWheelScratch = function (group, deckNumber, pulseLsb) {
-    var jogBendValue = DenonSC3900.jogWheelCountRegistry.getJogWheelCount(group)
-    var direction = jogBendValue > 64
-        ? 1
-        : -1
+DenonSC3900.jogWheelScratch = function (group, deckNumber, pulseWidthLsb) {
+    // The jog bend value is centered on 64 (0x40)
+    var jogBendValue = DenonSC3900.jogWheelBendRegistry.getJogWheelBend(group);
+    var direction = jogBendValue < 64
+        ? -1
+        : 1
     ;
 
-    var jogBendIntensity = Math.abs(jogBendValue - 64)
+    // The duration the vinyl disc took to walk through a pulse, in µs.
+    var pulseWidth = 0; // init var
 
-    var pulseMsb = DenonSC3900.jogWheelPulseMsbRegistry.getJogWheelPulseMsb(group)
+    // > 0 when the vinyl disc is moved on a tiny movement (e.g. when moving it
+    // by tiny distances with the fingers).
+    // This data is sent by the SC3900 unit to increase vinyl disc movement
+    // information precision.
+    // This value is [0-127].
+    var tinyMovementWalkedPulses = DenonSC3900
+        .jogWheelTinyMovementWalkedPulsesRegistry
+        .getJogWheelTinyMovementWalkedPulses(group)
+    ;
 
-    var fullValue = (jogBendIntensity << 14) + (pulseMsb << 7) + pulseLsb;
+    if (0 !== tinyMovementWalkedPulses) {
+        // The vinyl disc is moved on a tiny movement.
 
-    // divide by 20 to reduce mixxx sensitivity
-    var finalValue = fullValue / 20;
+        // The percentage of a complete revolution that this tiny movement
+        // represents.
+        var walkedPulsesRatio = tinyMovementWalkedPulses
+            / DenonSC3900.PLATTER_TINY_MOVEMENT_PULSES_COUNT_PER_REVOLUTION
+        ;
 
-    engine.scratchTick(deckNumber, finalValue * direction);
+        // Adapt this tiny movement to the normal movement pulse scale.
+        // As the `pulseWidth` represents a duration, the ratio is applied
+        // with a division instead of a multiplication to produce a high
+        // number, as we're making tiny movements (so it takes longer to
+        // walk pulses).
+        pulseWidth = DenonSC3900.PLATTER_PULSE_WIDTH / walkedPulsesRatio;
+    } else {
+        // The vinyl disc is moved on a non tiny movement.
+        var pulseWidthMsb = DenonSC3900
+            .jogWheelPulseWidthMsbRegistry
+            .getJogWheelPulseWidthMsb(group)
+        ;
+
+        var transmittedValue = ((pulseWidthMsb << 7) + pulseWidthLsb);
+
+        // The transmittedValue is the pulseWidth internally computed by the
+        // SC3900 to walk two pulses, we transform it to the duration
+        // between two pulses (i.e. the pulseWidth of a single pulse).
+        pulseWidth = transmittedValue * 0.5;
+    }
+
+    // The speed ratio at which the vinyl disc is rotating.
+    // 1 : same speed as the platter.
+    // < 1 : slower than the platter.
+    // > 1 : faster than the platter.
+    // 0 : stopped.
+    // The lower the pulseWidth is, the higher is the ratio as the pulseWidth
+    // represents the duration between two pulses.
+    var speedRatio = 0 === pulseWidth // prevent divide by 0
+        ? 0
+        : DenonSC3900.PLATTER_PULSE_WIDTH / pulseWidth
+    ;
+
+    engine.setValue(group, "scratch2", speedRatio * direction);
 }
 
 /**
@@ -660,25 +729,18 @@ DenonSC3900.jogWheelScratch = function (group, deckNumber, pulseLsb) {
  */
 DenonSC3900.jogWheelPitchBend = function (group) {
     // The jog bend value is centered on 64 (0x40)
-    var jogBendValue = DenonSC3900.jogWheelCountRegistry.getJogWheelCount(group)
+    var jogBendValue = DenonSC3900.jogWheelBendRegistry.getJogWheelBend(group);
 
-    // There are no message sent by the SC3900 unit when the jog wheel stops
-    // (i.e. when the bend is centered again), which is normal because messages
-    // are sent only when moving the wheel.
-    // In order to reset the pitch bend in mixx, we can consider the values
-    // juxtaposing the center value as being the center value, as they are
-    // always sent by the SC3900 unit when the jog wheel is stopping.
+    var relativeValue = jogBendValue - 64;
 
-    var shiftedValue = (63 === jogBendValue || 65 === jogBendValue)
-        ? 64
-        : jogBendValue
-    ;
-
-    var relativeValue = shiftedValue - 64;
-    // divide by 20 to reduce mixxx sensitivity
+    // divide by 20 to reduce mixxx sensibility
     var finalValue = relativeValue / 20;
 
-    engine.setValue(group, "jog", finalValue);
+    engine.setValue(
+        group,
+        "jog",
+        finalValue * DenonSC3900.JOG_WHEEL_PITCH_BEND_SENSIBILITY
+    );
 }
 
 // #############################################################################
@@ -743,11 +805,13 @@ DenonSC3900.vinylButtonPress = function (channel, control, value, status, group)
         // while the platter is changing its state. Otherwise it will
         // produce pitch bends on the track due to jog wheel speed change
         // when the platter speed changes.
+        // We also disable the scratching engine as we stop to consider the
+        // jog wheel signals.
         DenonSC3900.dropJogWheelMidiSignalsRegistry.drop(group);
         DenonSC3900.disableScratching(group);
 
         engine.beginTimer(
-            DenonSC3900.getPlatterStateTransitionDurationMs(),
+            DenonSC3900.PLATTER_STATE_TRANSITION_DURATION_MS,
             function () {
                 DenonSC3900.dropJogWheelMidiSignalsRegistry.accept(group);
 
@@ -787,7 +851,7 @@ DenonSC3900.rotatePlatter = function (outputChannel) {
 }
 
 /**
- * Whether to rotate or stop the SC3900 platter.
+ * Whether to rotate or stop the SC3900 platter, in function of the deck state.
  *
  * @param number outputChannel
  * @param string group
