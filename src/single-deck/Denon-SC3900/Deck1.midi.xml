@@ -444,8 +444,8 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.jogWheelCount</key>
-                <description>Jog wheel count.</description>
+                <key>DenonSC3900.jogWheelBend</key>
+                <description>Jog wheel bend.</description>
                 <status>0xB0</status>
                 <midino>0x51</midino>
                 <options>
@@ -454,8 +454,18 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.jogWheelPulseMsb</key>
-                <description>Jog wheel pulse MSB.</description>
+                <key>DenonSC3900.jogWheelTinyMovementWalkedPulses</key>
+                <description>The amount of walked pulses during tiny movements of the jog wheel.</description>
+                <status>0xB0</status>
+                <midino>0x1A</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.jogWheelPulseWidthMsb</key>
+                <description>Jog wheel pulse width MSB.</description>
                 <status>0xB0</status>
                 <midino>0x1B</midino>
                 <options>
@@ -464,8 +474,8 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.jogWheelPulseLsb</key>
-                <description>Jog wheel pulse LSB.</description>
+                <key>DenonSC3900.jogWheelPulseWidthLsb</key>
+                <description>Jog wheel pulse width LSB.</description>
                 <status>0xB0</status>
                 <midino>0x1C</midino>
                 <options>
