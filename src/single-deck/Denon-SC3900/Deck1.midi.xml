@@ -33,7 +33,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.vinylButtonPress</key>
+                <key>DenonSC3900.onVinylButtonPress</key>
                 <description>Vinyl button press.</description>
                 <status>0x90</status>
                 <midino>0x04</midino>
@@ -43,7 +43,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.hotcue1Press</key>
+                <key>DenonSC3900.onHotcue1Press</key>
                 <description>Hotcue 1 button press.</description>
                 <status>0x90</status>
                 <midino>0x17</midino>
@@ -53,7 +53,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.hotcue2Press</key>
+                <key>DenonSC3900.onHotcue2Press</key>
                 <description>Hotcue 2 button press.</description>
                 <status>0x90</status>
                 <midino>0x18</midino>
@@ -63,7 +63,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.hotcue3Press</key>
+                <key>DenonSC3900.onHotcue3Press</key>
                 <description>Hotcue 3 button press.</description>
                 <status>0x90</status>
                 <midino>0x19</midino>
@@ -73,7 +73,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.hotcue4Press</key>
+                <key>DenonSC3900.onHotcue4Press</key>
                 <description>Hotcue 4 button press.</description>
                 <status>0x90</status>
                 <midino>0x20</midino>
@@ -83,7 +83,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.hotcue5Press</key>
+                <key>DenonSC3900.onHotcue5Press</key>
                 <description>Hotcue 1 (MIDIBANK2) button press.</description>
                 <status>0x90</status>
                 <midino>0x73</midino>
@@ -93,7 +93,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.hotcue6Press</key>
+                <key>DenonSC3900.onHotcue6Press</key>
                 <description>Hotcue 2 (MIDIBANK2) button press.</description>
                 <status>0x90</status>
                 <midino>0x74</midino>
@@ -103,7 +103,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.hotcue7Press</key>
+                <key>DenonSC3900.onHotcue7Press</key>
                 <description>Hotcue 3 (MIDIBANK2) button press.</description>
                 <status>0x90</status>
                 <midino>0x75</midino>
@@ -113,7 +113,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.hotcue8Press</key>
+                <key>DenonSC3900.onHotcue8Press</key>
                 <description>Hotcue 4 (MIDIBANK2) button press.</description>
                 <status>0x90</status>
                 <midino>0x76</midino>
@@ -141,7 +141,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.syncButtonPress</key>
+                <key>DenonSC3900.onSyncButtonPress</key>
                 <description>SYNC button press.</description>
                 <status>0x90</status>
                 <midino>0x6B</midino>
@@ -151,7 +151,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.syncButtonRelease</key>
+                <key>DenonSC3900.onSyncButtonRelease</key>
                 <description>SYNC button release.</description>
                 <status>0x80</status>
                 <midino>0x6B</midino>
@@ -271,7 +271,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.cueButtonPress</key>
+                <key>DenonSC3900.onCueButtonPress</key>
                 <description>
                     On CUE button press : set CUE point when not on a CUE point,
                     or start CUE playback when on a CUE point.
@@ -284,7 +284,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.cueButtonRelease</key>
+                <key>DenonSC3900.onCueButtonRelease</key>
                 <description>Stop CUE playback on CUE button release and get back to CUE point.</description>
                 <status>0x80</status>
                 <midino>0x42</midino>
@@ -294,8 +294,8 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.playButtonPress</key>
-                <description>Play button press.</description>
+                <key>DenonSC3900.onPlayPauseButtonPress</key>
+                <description>Play / pause button press.</description>
                 <status>0x90</status>
                 <midino>0x43</midino>
                 <options>
@@ -424,7 +424,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.pitchFaderMsb</key>
+                <key>DenonSC3900.onPitchFaderMsb</key>
                 <description>Pitch slider MSB.</description>
                 <status>0xB0</status>
                 <midino>0x7A</midino>
@@ -434,7 +434,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.pitchFaderLsb</key>
+                <key>DenonSC3900.onPitchFaderLsb</key>
                 <description>Pitch slider LSB.</description>
                 <status>0xB0</status>
                 <midino>0x7B</midino>
@@ -444,7 +444,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.jogWheelBend</key>
+                <key>DenonSC3900.onJogWheelBend</key>
                 <description>Jog wheel bend.</description>
                 <status>0xB0</status>
                 <midino>0x51</midino>
@@ -454,7 +454,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.jogWheelTinyMovementWalkedPulses</key>
+                <key>DenonSC3900.onJogWheelTinyMovementWalkedPulses</key>
                 <description>The amount of walked pulses during tiny movements of the jog wheel.</description>
                 <status>0xB0</status>
                 <midino>0x1A</midino>
@@ -464,7 +464,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.jogWheelPulseWidthMsb</key>
+                <key>DenonSC3900.onJogWheelPulseWidthMsb</key>
                 <description>Jog wheel pulse width MSB.</description>
                 <status>0xB0</status>
                 <midino>0x1B</midino>
@@ -474,7 +474,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.jogWheelPulseWidthLsb</key>
+                <key>DenonSC3900.onJogWheelPulseWidthLsb</key>
                 <description>Jog wheel pulse width LSB.</description>
                 <status>0xB0</status>
                 <midino>0x1C</midino>
@@ -534,7 +534,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.midiBankSwitch</key>
+                <key>DenonSC3900.onMidiBankSwitch</key>
                 <description>MIDI BANK button release.</description>
                 <status>0x80</status>
                 <midino>0x77</midino>
@@ -544,7 +544,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.clrButtonPress</key>
+                <key>DenonSC3900.onClrButtonPress</key>
                 <description>CLR button press.</description>
                 <status>0x90</status>
                 <midino>0x1A</midino>
@@ -554,7 +554,7 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.clrButtonRelease</key>
+                <key>DenonSC3900.onClrButtonRelease</key>
                 <description>CLR button release.</description>
                 <status>0x80</status>
                 <midino>0x1A</midino>
