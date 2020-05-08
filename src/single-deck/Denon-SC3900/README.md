@@ -87,7 +87,7 @@ In normal MIDI mode, the start and stop times potentiometers aren't considered,
 as there's no way to influence on the platter rotation speed via MIDI (or at
 least not that I know).
 
-The platter is either rotating at the normal speed, or not.
+The platter is either rotating at the normal speed, or stopped.
 
 ## Hybrid MIDI mode
 
@@ -95,3 +95,13 @@ The hybrid MIDI mode requires that you use a sound card which will listen to
 the audio output of the SC3900 in order to determine the playback speed.
 
 It is the similar principle that is used for DVS.
+
+The following inputs are managed by the SC3900 deck itself when in hybrid MIDI
+mode :
+
+- Play/pause button
+- Vinyl mode button
+- Vinyl disc and platter
+- Pitch slider and +/- pitch bend buttons
+- Reverse button
+- Platter start and end time potentiometers
