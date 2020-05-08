@@ -216,7 +216,7 @@ DenonSC3900.jogWheelPulseWidthLsb = 0;
 DenonSC3900.jogWheelTimeIntervalCountElapsedBeforeWalkingAPulse = 0;
 // Activated by default when connecting the SC3900 unit in MIDI.
 DenonSC3900.vinylModeActivated = true;
-DenonSC3900.dropJogWheelMidiSignals = false;
+DenonSC3900.applyVinylDiscRotationSpeed = true;
 DenonSC3900.stoppedVinylDiscDetectionTimerId = null;
 // No playback by default when connecting the SC3900 unit in MIDI.
 DenonSC3900.playing = false;
@@ -480,6 +480,14 @@ DenonSC3900.updateScratchingStatus = function (group) {
  * @param float rate
  */
 DenonSC3900.setScratchingRate = function (group, rate) {
+    if (!DenonSC3900.applyVinylDiscRotationSpeed) {
+        // Ignore the wheel signal. The platter is probably changing its
+        // state while playback is on, so we should not consider the slowing
+        // or accelerating bends while the platter state changes, in order to
+        // avoid track pitch bends.
+        return;
+    }
+
     engine.setValue(group, "scratch2", rate);
 }
 
@@ -500,14 +508,6 @@ DenonSC3900.onJogWheelPulseWidthMsb = function (channel, control, value) {
 
 // on jog wheel pulse width LSB change
 DenonSC3900.onJogWheelPulseWidthLsb = function (channel, control, value, status, group) {
-    if (DenonSC3900.dropJogWheelMidiSignals) {
-        // Ignore the wheel signal. The platter is probably changing its
-        // state while playback is on, so we should not consider the slowing
-        // or accelerating bends while the platter state changes, in order to
-        // avoid track pitch bends.
-        return
-    }
-
     DenonSC3900.jogWheelPulseWidthLsb = value;
 
     DenonSC3900.vinylModeActivated
@@ -646,7 +646,7 @@ DenonSC3900.removeStoppedVinylDiscDetectionTimer = function () {
 DenonSC3900.onCueButtonPress = function (channel, control, value, status, group) {
     if (DenonSC3900.playing) {
         if (DenonSC3900.vinylModeActivated) {
-            DenonSC3900.dropJogWheelMidiSignalsWhilePlatterStateIsChanging(group, false);
+            DenonSC3900.dontApplyVinylDiscRotationWhilePlatterStateIsChanging(group, false);
 
             DenonSC3900.stopPlatter(
                 DenonSC3900.getOutputMidiChannel(channel)
@@ -694,16 +694,16 @@ DenonSC3900.onPlayPauseButtonPress = function (channel, control, value, status, 
 // #############################################################################
 
 /**
- * Avoid to consider the jog wheel messages while the platter is changing its
- * state. It prevents to produce pitch bends on the track due to jog wheel speed
- * change when the platter speed changes.
+ * Avoid to apply the vinyl disc rotation rate while the platter is changing its
+ * state. It prevents to produce pitch bends on the track due to the vinyl disc
+ * speed change when the platter speed changes.
  *
  * @param string group
  * @param bool   shouldUpdateScratchingStatus Indicates whether we should update
  *               the scratching status when the platter state has changed.
  */
-DenonSC3900.dropJogWheelMidiSignalsWhilePlatterStateIsChanging = function (group, shouldUpdateScratchingStatus) {
-    DenonSC3900.dropJogWheelMidiSignals = true;
+DenonSC3900.dontApplyVinylDiscRotationWhilePlatterStateIsChanging = function (group, shouldUpdateScratchingStatus) {
+    DenonSC3900.applyVinylDiscRotationSpeed = false;
 
     // We disable the scratching engine as we stop to consider the jog wheel
     // signals, so the track speed is not controlled by the jog wheel anymore.
@@ -712,7 +712,7 @@ DenonSC3900.dropJogWheelMidiSignalsWhilePlatterStateIsChanging = function (group
     engine.beginTimer(
         DenonSC3900.PLATTER_STATE_TRANSITION_DURATION_MS,
         function () {
-            DenonSC3900.dropJogWheelMidiSignals = false;
+            DenonSC3900.applyVinylDiscRotationSpeed = true;
 
             if (shouldUpdateScratchingStatus) {
                 // Decide whether the scratching engine should be enabled back
@@ -740,7 +740,7 @@ DenonSC3900.onVinylButtonPress = function (channel, control, value, status, grou
     if (DenonSC3900.playing) {
         // When the playback is on, avoid to consider the jog wheel messages
         // while the platter is changing its state.
-        DenonSC3900.dropJogWheelMidiSignalsWhilePlatterStateIsChanging(group, true);
+        DenonSC3900.dontApplyVinylDiscRotationWhilePlatterStateIsChanging(group, true);
     }
 
     DenonSC3900.updatePlatterStatus(outputChannel);
