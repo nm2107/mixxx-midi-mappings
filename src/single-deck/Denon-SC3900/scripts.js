@@ -113,6 +113,10 @@ DenonSC3900.HIGH_RES_PLATTER_PULSES_PER_MS =
 
 DenonSC3900.LONG_PRESS_THRESHOLD_MS = 500;
 
+// @see https://www.mixxx.org/wiki/doku.php/mixxxcontrols
+DenonSC3900.BEATJUMP_SIZES = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64];
+DenonSC3900.BEATJUMP_SIZE_DEFAULT = 4; // same as when mixxx starts
+
 // #############################################################################
 // ## Utilities
 // #############################################################################
@@ -251,7 +255,7 @@ DenonSC3900.stoppedVinylDiscDetectionTimerId = null;
 DenonSC3900.playing = !DenonSC3900.isNormalMidiMode();
 
 // #############################################################################
-// ## Shutdown management
+// ## Init management
 // #############################################################################
 
 // on deck init
@@ -410,6 +414,54 @@ for (var i = 1; i <= DenonSC3900.getHotcuesCount(); i++) {
 
     // create onHotcueXPress handlers
     DenonSC3900[hotcuePressHandlerName] = DenonSC3900.createHotcuePressHandler(i)
+}
+
+// #############################################################################
+// ## Beatjump size management
+// #############################################################################
+
+// on track search - button press
+DenonSC3900.onBeatJumpSizeDecrease = function (channel, control, value, status, group) {
+    var currentSize = engine.getValue(group, "beatjump_size");
+
+    var index = DenonSC3900.BEATJUMP_SIZES.indexOf(currentSize);
+
+    var newSize;
+
+    if (-1 === index) {
+        // current value not found in possibilities,
+        // so get back to default value
+        newSize = DenonSC3900.BEATJUMP_SIZE_DEFAULT;
+    } else if (0 === index) {
+        // already at minimum size
+        newSize = currentSize;
+    } else {
+        newSize = DenonSC3900.BEATJUMP_SIZES[index - 1];
+    }
+
+    engine.setValue(group, "beatjump_size", newSize);
+}
+
+// on track search + button press
+DenonSC3900.onBeatJumpSizeIncrease = function (channel, control, value, status, group) {
+    var currentSize = engine.getValue(group, "beatjump_size");
+
+    var index = DenonSC3900.BEATJUMP_SIZES.indexOf(currentSize);
+
+    var newSize;
+
+    if (-1 === index) {
+        // current value not found in possibilities,
+        // so get back to default value
+        newSize = DenonSC3900.BEATJUMP_SIZE_DEFAULT;
+    } else if (DenonSC3900.BEATJUMP_SIZES.length - 1 === index) {
+        // already at maximum size
+        newSize = currentSize;
+    } else {
+        newSize = DenonSC3900.BEATJUMP_SIZES[index + 1];
+    }
+
+    engine.setValue(group, "beatjump_size", newSize);
 }
 
 // #############################################################################

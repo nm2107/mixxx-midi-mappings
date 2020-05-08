@@ -59,8 +59,10 @@ attempt to eject the CD medium when pressed)
     - 4 on MIDI BANK 2
     - Ability to clear the hotcues one by one (hold down `CLR` button then
 select the hotcue to clear)
-- Search forward (`Fast Search` forward button)
-- Search backward (`Fast Search` backward button)
+- Jump forward (`Fast Search` forward button)
+- Jump backward (`Fast Search` backward button)
+- Increase or decrease the forward and backward jump size (`Track search` `-`
+and `+` buttons)
 - Reverse playback
 - Dump playback (aka slip playback)
 - CUE
