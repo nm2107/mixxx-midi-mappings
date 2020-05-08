@@ -484,6 +484,26 @@
             </control>
             <control>
                 <group>[Channel1]</group>
+                <key>DenonSC3900.onBeatJumpSizeDecrease</key>
+                <description>Track search - button press.</description>
+                <status>0x90</status>
+                <midino>0x0D</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.onBeatJumpSizeIncrease</key>
+                <description>Track search + button press.</description>
+                <status>0x90</status>
+                <midino>0x0C</midino>
+                <options>
+                    <script-binding/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
                 <key>beatjump_backward</key>
                 <description>Fast search - button press.</description>
                 <status>0x90</status>
