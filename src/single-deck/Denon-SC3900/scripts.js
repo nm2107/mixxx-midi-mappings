@@ -76,12 +76,6 @@ DenonSC3900.PLATTER_STOP = 0x00
 // You may change this value to 45 if your SC3900 unit is set to have 45 RPM.
 DenonSC3900.PLATTER_RPM = 33 + 1/3;
 DenonSC3900.PLATTER_STATE_TRANSITION_DURATION_MS = 400; // no matter RPM rate
-// When moving at normal speed (pitch 0), this is the amount of pulses that the
-// SC3900 is internally effecting. As described in the Denon manual.
-DenonSC3900.PLATTER_PULSES_COUNT_PER_REVOLUTION = 900;
-// When moving at tiny speed, this is the amount of pulses that the SC3900 is
-// internally effecting. As described in the Denon manual.
-DenonSC3900.PLATTER_TINY_MOVEMENT_PULSES_COUNT_PER_REVOLUTION = 3600;
 
 // The duration of a revolution, at normal speed (pitch 0) in µs.
 // We use the µs unit as the S3900 deck is sending us data in this unit.
@@ -91,10 +85,27 @@ DenonSC3900.PLATTER_REVOLUTION_WIDTH =
     // convert it to µs
     * 1000000
 ;
-// The duration between two pulses, at normal speed (pitch 0), in µs.
+// The duration between two pulses at normal speed, in µs.
 // We use the µs unit as the S3900 deck is sending us data in this unit.
-DenonSC3900.PLATTER_PULSE_WIDTH = DenonSC3900.PLATTER_REVOLUTION_WIDTH
-    / DenonSC3900.PLATTER_PULSES_COUNT_PER_REVOLUTION
+// The scale used here is 900 pulses per revolution, as specified in the
+// Denon manual. The jog wheel pulse width sent by the SC3900 uses this scale.
+DenonSC3900.PLATTER_PULSE_WIDTH = DenonSC3900.PLATTER_REVOLUTION_WIDTH / 900;
+
+// The minimum time interval that is considered by the SC3900 unit to count
+// the amount of these intervals elapsed before walking a pulse when using the
+// high res pulses per revolution scale.
+// This interval is in ms. As specified in the Denon manual (> 4 ms).
+DenonSC3900.HIGH_RES_MINIMUM_TIME_INTERVAL_BEFORE_WALKING_A_PULSE_MS = 5;
+// The number of pulses per miliseconds the platter is doing when moving
+// at normal speed (pitch 0) on the high res pulses per revolution scale.
+// This scale is 3600, as specified in the Denon manual.
+DenonSC3900.HIGH_RES_PLATTER_PULSES_PER_MS =
+    3600 / (
+        // duration of a revolution, in seconds
+        (60 / DenonSC3900.PLATTER_RPM)
+        // convert it to ms
+        * 1000
+    )
 ;
 
 DenonSC3900.LONG_PRESS_THRESHOLD_MS = 500;
@@ -177,9 +188,9 @@ DenonSC3900.isPlaying = function (group) {
 // ## Registries
 // #############################################################################
 
-// We can declare vars on the `DenonSC3900` object directly no matter the given
-// `group` received in listeners as a group is composed of one deck only and
-// this script is not memory shared among decks.
+// We can declare these vars on the `DenonSC3900` object directly no matter the
+// given `group` received in listeners as a group is composed of one deck only
+// and this script is not memory shared among decks.
 
 DenonSC3900.clrButtonPressed = false;
 DenonSC3900.syncButtonPressedAt = null;
@@ -187,7 +198,8 @@ DenonSC3900.pitchFaderMsb = 0;
 // The jog bend value is centered on 64 (0x40)
 DenonSC3900.jogWheelBend = 64;
 DenonSC3900.jogWheelPulseWidthMsb = 0;
-DenonSC3900.jogWheelTinyMovementWalkedPulses = 0;
+DenonSC3900.jogWheelPulseWidthLsb = 0;
+DenonSC3900.jogWheelTimeIntervalCountElapsedBeforeWalkingAPulse = 0;
 // Activated by default when connecting the SC3900 unit in MIDI.
 DenonSC3900.vinylModeActivated = true;
 DenonSC3900.dropJogWheelMidiSignals = false;
@@ -455,9 +467,9 @@ DenonSC3900.onJogWheelBend = function (channel, control, value) {
     DenonSC3900.jogWheelBend = value;
 }
 
-// on jog wheel tiny movement walked pulses change
-DenonSC3900.onJogWheelTinyMovementWalkedPulses = function (channel, control, value) {
-    DenonSC3900.jogWheelTinyMovementWalkedPulses = value;
+// when the time interval count elapsed before walking a pulse changes
+DenonSC3900.onJogWheelTimeIntervalCountElapsedBeforeWalkingAPulse = function (channel, control, value) {
+    DenonSC3900.jogWheelTimeIntervalCountElapsedBeforeWalkingAPulse = value
 }
 
 // on jog wheel pulse width MSB change
@@ -475,10 +487,12 @@ DenonSC3900.onJogWheelPulseWidthLsb = function (channel, control, value, status,
         return
     }
 
+    DenonSC3900.jogWheelPulseWidthLsb = value;
+
     var deckNumber = script.deckFromGroup(group);
 
     engine.isScratching(deckNumber)
-        ? DenonSC3900.jogWheelScratch(group, deckNumber, value)
+        ? DenonSC3900.jogWheelScratch(group, deckNumber)
         : DenonSC3900.jogWheelPitchBend(group)
     ;
 }
@@ -486,63 +500,60 @@ DenonSC3900.onJogWheelPulseWidthLsb = function (channel, control, value, status,
 /**
  * @param string group
  * @param number deckNumber
- * @param number pulseWidthLsb
  */
-DenonSC3900.jogWheelScratch = function (group, deckNumber, pulseWidthLsb) {
+DenonSC3900.jogWheelScratch = function (group, deckNumber) {
     // The jog bend value is centered on 64 (0x40)
     var direction = DenonSC3900.jogWheelBend < 64
         ? -1
         : 1
     ;
 
-    // The duration the vinyl disc took to walk through a pulse, in µs.
-    var pulseWidth = 0; // init var
-
-    // > 0 when the vinyl disc is moved on a tiny movement (e.g. when moving it
-    // by tiny distances with the fingers).
-    // This data is sent by the SC3900 unit to increase vinyl disc movement
-    // information precision.
-    // This value is [0-127].
-    var tinyMovementWalkedPulses = DenonSC3900.jogWheelTinyMovementWalkedPulses;
-
-    if (0 !== tinyMovementWalkedPulses) {
-        // The vinyl disc is moved on a tiny movement.
-
-        // The percentage of a complete revolution that this tiny movement
-        // represents.
-        var walkedPulsesRatio = tinyMovementWalkedPulses
-            / DenonSC3900.PLATTER_TINY_MOVEMENT_PULSES_COUNT_PER_REVOLUTION
-        ;
-
-        // Adapt this tiny movement to the normal movement pulse scale.
-        // As the `pulseWidth` represents a duration, the ratio is applied
-        // with a division instead of a multiplication to produce a high
-        // number, as we're making tiny movements (so it takes longer to
-        // walk pulses).
-        pulseWidth = DenonSC3900.PLATTER_PULSE_WIDTH / walkedPulsesRatio;
-    } else {
-        // The vinyl disc is moved on a non tiny movement.
-        var pulseWidthMsb = DenonSC3900.jogWheelPulseWidthMsb;
-
-        var transmittedValue = ((pulseWidthMsb << 7) + pulseWidthLsb);
-
-        // The transmittedValue is the pulseWidth internally computed by the
-        // SC3900 to walk two pulses, we transform it to the duration
-        // between two pulses (i.e. the pulseWidth of a single pulse).
-        pulseWidth = transmittedValue * 0.5;
-    }
-
-    // The speed ratio at which the vinyl disc is rotating.
     // 1 : same speed as the platter.
     // < 1 : slower than the platter.
     // > 1 : faster than the platter.
     // 0 : stopped.
-    // The lower the pulseWidth is, the higher is the ratio as the pulseWidth
-    // represents the duration between two pulses.
-    var speedRatio = 0 === pulseWidth // prevent divide by 0
-        ? 0
-        : DenonSC3900.PLATTER_PULSE_WIDTH / pulseWidth
-    ;
+    var speedRatio = 0.0; // init var
+
+    if (DenonSC3900.jogWheelTimeIntervalCountElapsedBeforeWalkingAPulse > 0) {
+        // When the time interval count elapsed before walking a pulse is
+        // greater than zero, it means that the vinyl disc is rotated at very
+        // low speed (typically when holding down the fingers on it and making
+        // tiny moves).
+        // In this use case, the pulse count per revolution is not the same than
+        // at normal speed. This count increase is here to increase the
+        // precision measurement of the vinyl disc rotation speed at very low
+        // speed.
+
+        // in miliseconds
+        var walkDurationMs =
+            DenonSC3900.jogWheelTimeIntervalCountElapsedBeforeWalkingAPulse
+            * DenonSC3900.HIGH_RES_MINIMUM_TIME_INTERVAL_BEFORE_WALKING_A_PULSE_MS
+        ;
+
+        // we have walked one pulse in `walkDurationMs` miliseconds
+        var discPulsesPerMs = 1 / walkDurationMs;
+
+        speedRatio =
+            discPulsesPerMs / DenonSC3900.HIGH_RES_PLATTER_PULSES_PER_MS
+        ;
+    } else {
+        // When not on a tiny movement, the disc speed info is transmitted
+        // on 14bits data.
+        var pulseWidthMsb = DenonSC3900.jogWheelPulseWidthMsb;
+        var pulseWidthLsb = DenonSC3900.jogWheelPulseWidthLsb;
+
+        var transmittedValue = ((pulseWidthMsb << 7) + pulseWidthLsb);
+
+        // The transmitted value is computed from the time it takes to
+        // walk two complete pulses, so we divide it by two to get the pulse
+        // width of a single pulse.
+        var pulseWidth = transmittedValue / 2;
+
+        speedRatio = 0 == pulseWidth // prevent divide by 0
+            ? 0.0
+            : DenonSC3900.PLATTER_PULSE_WIDTH / pulseWidth
+        ;
+    }
 
     engine.setValue(group, "scratch2", speedRatio * direction);
 }

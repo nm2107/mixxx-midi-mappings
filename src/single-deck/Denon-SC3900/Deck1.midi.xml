@@ -454,8 +454,8 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.onJogWheelTinyMovementWalkedPulses</key>
-                <description>The amount of walked pulses during tiny movements of the jog wheel.</description>
+                <key>DenonSC3900.onJogWheelTimeIntervalCountElapsedBeforeWalkingAPulse</key>
+                <description>Indicates the count of time intervals elapsed before walking a pulse.</description>
                 <status>0xB0</status>
                 <midino>0x1A</midino>
                 <options>
