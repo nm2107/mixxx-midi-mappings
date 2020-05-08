@@ -126,6 +126,17 @@ DenonSC3900.getOutputMidiChannel = function (inputChannel) {
 }
 
 /**
+ * @param number inputChannel (0 based)
+ *
+ * @return string
+ */
+DenonSC3900.getGroupName = function (inputChannel) {
+    var channelNumber = inputChannel + 1;
+
+    return "[Channel" + channelNumber + "]";
+}
+
+/**
  * @return int The current timestamp, in miliseconds.
  */
 DenonSC3900.getTimestampMs = function () {
@@ -160,32 +171,35 @@ DenonSC3900.isHotcueSet = function (group, hotcueNumber) {
 
 /**
  * @param string group
- * @param int hotcueNumber
  *
  * @return bool
  */
-DenonSC3900.isHotcueSetAndPlaybackDisabled = function (group, hotcueNumber) {
-    return DenonSC3900.isHotcueSet(group, hotcueNumber)
-        && !DenonSC3900.isPlaying(group)
-    ;
-}
+DenonSC3900.isCursorOnCuePoint = function (group) {
+    // the CUE point position, in samples
+    var cuePointPosition = engine.getValue(group, "cue_point");
 
-/**
- * @param string group
- *
- * @return bool
- */
-DenonSC3900.isPlaying = function (group) {
-    return (
-            engine.getValue(group, "play_indicator")
-            || engine.getValue(group, "play")
-        )
-        && !engine.getValue(group, "cue_default")
-    ;
+    // the position of the cursor in the track [0-1]
+    var cursorPositionRate = engine.getValue(group, "playposition");
+    // the amount of samples in the track
+    var trackSamplesCount = engine.getValue(group, "track_samples");
+
+    // the cursor position, in samples
+    var cursorPosition = cursorPositionRate * trackSamplesCount;
+
+    // Compare the difference rate instead of the position samples directly,
+    // as there can have a few samples diff (e.g. < 10) when the cursor is
+    // placed on the CUE point.
+    var lowestPosition = Math.min(cuePointPosition, cursorPosition);
+    var highestPosition = Math.max(cuePointPosition, cursorPosition);
+    var rate = lowestPosition / highestPosition;
+
+    // When the diff rate is below 1 per-mille, we consider the cursor position
+    // as being on the CUE point position.
+    return (1 - rate) < 0.001;
 }
 
 // #############################################################################
-// ## Registries
+// ## State
 // #############################################################################
 
 // We can declare these vars on the `DenonSC3900` object directly no matter the
@@ -203,6 +217,8 @@ DenonSC3900.jogWheelTimeIntervalCountElapsedBeforeWalkingAPulse = 0;
 // Activated by default when connecting the SC3900 unit in MIDI.
 DenonSC3900.vinylModeActivated = true;
 DenonSC3900.dropJogWheelMidiSignals = false;
+// No playback by default when connecting the SC3900 unit in MIDI.
+DenonSC3900.playing = false;
 
 // #############################################################################
 // ## Shutdown management
@@ -221,6 +237,7 @@ DenonSC3900.init = function () {
 
     for (var channel = 0; channel < DenonSC3900.getDecksCount(); channel++) {
         var outputChannel = DenonSC3900.getOutputMidiChannel(channel);
+        var group = DenonSC3900.getGroupName(channel);
 
         midi.sendShortMsg(
             outputChannel,
@@ -228,7 +245,8 @@ DenonSC3900.init = function () {
             DenonSC3900.VINYL_WRITE_ADDRESS
         );
 
-        DenonSC3900.stopPlatter(outputChannel);
+        DenonSC3900.updatePlatterStatus(outputChannel);
+        DenonSC3900.updateScratchingStatus(group);
     }
 }
 
@@ -329,7 +347,7 @@ DenonSC3900.onClrButtonRelease = function () {
 DenonSC3900.onHotcuePress = function (group, hotcueNumber) {
     var action = DenonSC3900.clrButtonPressed
         ? "clear"
-        : DenonSC3900.isHotcueSetAndPlaybackDisabled(group, hotcueNumber)
+        : (DenonSC3900.isHotcueSet(group, hotcueNumber) && !DenonSC3900.playing)
             ? "goto"
             : "activate"
     ;
@@ -450,16 +468,18 @@ DenonSC3900.disableScratching = function (group) {
  * @param string group
  */
 DenonSC3900.updateScratchingStatus = function (group) {
-    if (!DenonSC3900.isPlaying(group)) {
-        DenonSC3900.enableScratching(group);
-
-        return
-    }
-
     DenonSC3900.vinylModeActivated
         ? DenonSC3900.enableScratching(group)
         : DenonSC3900.disableScratching(group)
     ;
+}
+
+/**
+ * @param string group
+ * @param float rate
+ */
+DenonSC3900.setScratchingRate = function (group, rate) {
+    engine.setValue(group, "scratch2", rate);
 }
 
 // on jog wheel bend change
@@ -489,19 +509,16 @@ DenonSC3900.onJogWheelPulseWidthLsb = function (channel, control, value, status,
 
     DenonSC3900.jogWheelPulseWidthLsb = value;
 
-    var deckNumber = script.deckFromGroup(group);
-
-    engine.isScratching(deckNumber)
-        ? DenonSC3900.jogWheelScratch(group, deckNumber)
+    DenonSC3900.vinylModeActivated
+        ? DenonSC3900.jogWheelScratch(group)
         : DenonSC3900.jogWheelPitchBend(group)
     ;
 }
 
 /**
  * @param string group
- * @param number deckNumber
  */
-DenonSC3900.jogWheelScratch = function (group, deckNumber) {
+DenonSC3900.jogWheelScratch = function (group) {
     // The jog bend value is centered on 64 (0x40)
     var direction = DenonSC3900.jogWheelBend < 64
         ? -1
@@ -512,7 +529,7 @@ DenonSC3900.jogWheelScratch = function (group, deckNumber) {
     // < 1 : slower than the platter.
     // > 1 : faster than the platter.
     // 0 : stopped.
-    var speedRatio = 0.0; // init var
+    var vinylDiscSpeedRatio = 0.0; // init var
 
     if (DenonSC3900.jogWheelTimeIntervalCountElapsedBeforeWalkingAPulse > 0) {
         // When the time interval count elapsed before walking a pulse is
@@ -531,10 +548,10 @@ DenonSC3900.jogWheelScratch = function (group, deckNumber) {
         ;
 
         // we have walked one pulse in `walkDurationMs` miliseconds
-        var discPulsesPerMs = 1 / walkDurationMs;
+        var vinylDiscPulsesPerMs = 1 / walkDurationMs;
 
-        speedRatio =
-            discPulsesPerMs / DenonSC3900.HIGH_RES_PLATTER_PULSES_PER_MS
+        vinylDiscSpeedRatio =
+            vinylDiscPulsesPerMs / DenonSC3900.HIGH_RES_PLATTER_PULSES_PER_MS
         ;
     } else {
         // When not on a tiny movement, the disc speed info is transmitted
@@ -549,13 +566,13 @@ DenonSC3900.jogWheelScratch = function (group, deckNumber) {
         // width of a single pulse.
         var pulseWidth = transmittedValue / 2;
 
-        speedRatio = 0 == pulseWidth // prevent divide by 0
+        vinylDiscSpeedRatio = 0 == pulseWidth // prevent divide by 0
             ? 0.0
             : DenonSC3900.PLATTER_PULSE_WIDTH / pulseWidth
         ;
     }
 
-    engine.setValue(group, "scratch2", speedRatio * direction);
+    DenonSC3900.setScratchingRate(group, vinylDiscSpeedRatio * direction);
 }
 
 /**
@@ -581,22 +598,34 @@ DenonSC3900.jogWheelPitchBend = function (group) {
 
 // on CUE button press
 DenonSC3900.onCueButtonPress = function (channel, control, value, status, group) {
-    engine.setValue(group, "cue_default", value);
+    if (DenonSC3900.playing) {
+        if (DenonSC3900.vinylModeActivated) {
+            DenonSC3900.dropJogWheelMidiSignalsWhilePlatterStateIsChanging(group, false);
 
-    DenonSC3900.stopPlatter(
-        DenonSC3900.getOutputMidiChannel(channel)
-    );
+            DenonSC3900.stopPlatter(
+                DenonSC3900.getOutputMidiChannel(channel)
+            );
+        }
 
-    DenonSC3900.disableScratching(group);
+        engine.setValue(group, "cue_gotoandstop", value);
+
+        DenonSC3900.playing = false;
+
+        return;
+    }
+
+    DenonSC3900.isCursorOnCuePoint(group)
+        ? engine.setValue(group, "cue_preview", true)
+        : engine.setValue(group, "cue_set", true)
+    ;
 }
 
 // on CUE button release
 DenonSC3900.onCueButtonRelease = function (channel, control, value, status, group) {
-    engine.setValue(group, "cue_default", value);
-
-    // We should be able to scratch when on a CUE point to navigate through the
-    // track.
-    DenonSC3900.enableScratching(group);
+    // the cue preview mode is setting the `play` flag to true, so we make sure
+    // it is disabled when releasing the cue button
+    engine.setValue(group, "play", false);
+    engine.setValue(group, "cue_gotoandstop", true);
 }
 
 // #############################################################################
@@ -605,12 +634,11 @@ DenonSC3900.onCueButtonRelease = function (channel, control, value, status, grou
 
 // on Play/Pause button press
 DenonSC3900.onPlayPauseButtonPress = function (channel, control, value, status, group) {
-    engine.setValue(group, "play", value); // internally toggled
+    DenonSC3900.playing = !DenonSC3900.playing;
 
-    DenonSC3900.updatePlatterStatus(
-        DenonSC3900.getOutputMidiChannel(channel),
-        group
-    );
+    engine.setValue(group, "play", DenonSC3900.playing);
+
+    DenonSC3900.updatePlatterStatus(DenonSC3900.getOutputMidiChannel(channel));
 
     DenonSC3900.updateScratchingStatus(group);
 }
@@ -618,6 +646,37 @@ DenonSC3900.onPlayPauseButtonPress = function (channel, control, value, status, 
 // #############################################################################
 // ## Vinyl mode management
 // #############################################################################
+
+/**
+ * Avoid to consider the jog wheel messages while the platter is changing its
+ * state. It prevents to produce pitch bends on the track due to jog wheel speed
+ * change when the platter speed changes.
+ *
+ * @param string group
+ * @param bool   shouldUpdateScratchingStatus Indicates whether we should update
+ *               the scratching status when the platter state has changed.
+ */
+DenonSC3900.dropJogWheelMidiSignalsWhilePlatterStateIsChanging = function (group, shouldUpdateScratchingStatus) {
+    DenonSC3900.dropJogWheelMidiSignals = true;
+
+    // We disable the scratching engine as we stop to consider the jog wheel
+    // signals, so the track speed is not controlled by the jog wheel anymore.
+    DenonSC3900.disableScratching(group);
+
+    engine.beginTimer(
+        DenonSC3900.PLATTER_STATE_TRANSITION_DURATION_MS,
+        function () {
+            DenonSC3900.dropJogWheelMidiSignals = false;
+
+            if (shouldUpdateScratchingStatus) {
+                // Decide whether the scratching engine should be enabled back
+                // or not.
+                DenonSC3900.updateScratchingStatus(group);
+            }
+        },
+        true
+    );
+}
 
 // on VINYL button press
 DenonSC3900.onVinylButtonPress = function (channel, control, value, status, group) {
@@ -632,28 +691,13 @@ DenonSC3900.onVinylButtonPress = function (channel, control, value, status, grou
 
     midi.sendShortMsg(outputChannel, lightStatus, DenonSC3900.VINYL_WRITE_ADDRESS);
 
-    if (DenonSC3900.isPlaying(group)) {
+    if (DenonSC3900.playing) {
         // When the playback is on, avoid to consider the jog wheel messages
-        // while the platter is changing its state. Otherwise it will
-        // produce pitch bends on the track due to jog wheel speed change
-        // when the platter speed changes.
-        // We also disable the scratching engine as we stop to consider the
-        // jog wheel signals.
-        DenonSC3900.dropJogWheelMidiSignals = true;
-        DenonSC3900.disableScratching(group);
-
-        engine.beginTimer(
-            DenonSC3900.PLATTER_STATE_TRANSITION_DURATION_MS,
-            function () {
-                DenonSC3900.dropJogWheelMidiSignals = false;
-
-                DenonSC3900.updateScratchingStatus(group);
-            },
-            true
-        );
+        // while the platter is changing its state.
+        DenonSC3900.dropJogWheelMidiSignalsWhilePlatterStateIsChanging(group, true);
     }
 
-    DenonSC3900.updatePlatterStatus(outputChannel, group);
+    DenonSC3900.updatePlatterStatus(outputChannel);
 }
 
 // #############################################################################
@@ -686,16 +730,15 @@ DenonSC3900.rotatePlatter = function (outputChannel) {
  * Whether to rotate or stop the SC3900 platter, in function of the deck state.
  *
  * @param number outputChannel
- * @param string group
  */
-DenonSC3900.updatePlatterStatus = function (outputChannel, group) {
+DenonSC3900.updatePlatterStatus = function (outputChannel) {
     if (!DenonSC3900.vinylModeActivated) {
         DenonSC3900.stopPlatter(outputChannel);
 
         return
     }
 
-    DenonSC3900.isPlaying(group)
+    DenonSC3900.playing
         ? DenonSC3900.rotatePlatter(outputChannel)
         : DenonSC3900.stopPlatter(outputChannel)
     ;
