@@ -8,6 +8,7 @@ Refer to the general [README](/README.md) to know how to install this mapping.
 *Table of contents :*
 
 - [Deck configuration](#deck-configuration)
+- [Mapping configuration](#mapping-configuration)
 - [Features](#features)
 - [Normal MIDI mode](#normal-midi-mode)
 - [Hybrid MIDI mode](#hybrid-midi-mode)
@@ -22,10 +23,29 @@ For MacOS users, set it to `MAC`.
 Then, make sure to set the SC3900 MIDI channel to the one matching the deck on
 mixxx.
 
+## Mapping configuration
+
+There are some configuration variables that you may change depending on the
+way you want to use your SC3900.
+These variables are declared in the [`scripts.js`](./scripts.js) file.
+
+- `DenonSC3900.MIDI_MODE` : the MIDI mode you used to connect the SC3900 to the
+computer. Can be `normal` or `hybrid`. Defaults to `normal`.
+- `DenonSC3900.PLATTER_RPM` : use the same setting than on your SC3900.
+Defaults to `33 + 1/3`.
+- `DenonSC3900.JOG_WHEEL_PITCH_BEND_SENSIBILITY` : the sensibility of the vinyl
+disc when used as a jog wheel. Only considered in `normal` MIDI mode. Set it to
+a positive float (> 1 is more sensible, < 1 is less sensible). Defaults to
+`1.0`.
+
+All the other variables should remain unchanged.
+
 ## Features
 
 Here are the features available in both normal and hybrid MIDI modes :
 
+- `VINYL` mode button : let you choose whether the wheel acts like a vinyl
+(and so allows you to scratch), or like a classic jog wheel.
 - Track eject (mapped on the USB eject button as the disc eject button would
 attempt to eject the CD medium when pressed)
 - Auto loop (aka beatgrid loop)
@@ -63,19 +83,25 @@ master)
 
 ## Normal MIDI mode
 
-In normal MIDI mode, the platter never rotates (it is by design, and the
-VINYL button has no effect neither), so the vinyl disc acts like a jog wheel
-during playback.
+In normal MIDI mode, the start and stop times potentiometers aren't considered,
+as there's no way to influence on the platter rotation speed via MIDI (or at
+least not that I know).
 
-When the playback is paused and the vinyl disc is rotated, scratching is
-activated to be able to navigate through the track.
+The platter is either rotating at the normal speed, or stopped.
 
 ## Hybrid MIDI mode
 
-In hybrid MIDI mode, when the VINYL mode is on, scratching is enabled (and
-the platter is rotating).
-When the VINYL mode is off, the vinyl disc acts like a jog wheel.
+The hybrid MIDI mode requires that you use a sound card which will listen to
+the audio output of the SC3900 in order to determine the playback speed.
 
-In hybrid MIDI mode, the SC3900 unit doesn't send any MIDI messages during the
-vinyl disc manipulation (neither when the playback is running).
-Instead, the unit is sending an audio signal that should be used for DVS.
+It is the similar principle that is used for DVS.
+
+The following inputs are managed by the SC3900 deck itself when in hybrid MIDI
+mode :
+
+- Play/pause button
+- Vinyl mode button
+- Vinyl disc and platter
+- Pitch slider and +/- pitch bend buttons
+- Reverse button
+- Platter start and end time potentiometers
