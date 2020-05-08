@@ -646,7 +646,12 @@ DenonSC3900.removeStoppedVinylDiscDetectionTimer = function () {
 DenonSC3900.onCueButtonPress = function (channel, control, value, status, group) {
     if (DenonSC3900.playing) {
         if (DenonSC3900.vinylModeActivated) {
-            DenonSC3900.dontApplyVinylDiscRotationWhilePlatterStateIsChanging(group, false);
+            // Tell mixxx to immediatly stop the disc rotation speed, and
+            // ignore the received disc speed messages from the SC3900 while
+            // the platter stops.
+            DenonSC3900.setScratchingRate(group, 0.0);
+
+            DenonSC3900.dontApplyVinylDiscRotationSpeedWhilePlatterStateIsChanging(group);
 
             DenonSC3900.stopPlatter(
                 DenonSC3900.getOutputMidiChannel(channel)
@@ -660,18 +665,31 @@ DenonSC3900.onCueButtonPress = function (channel, control, value, status, group)
         return;
     }
 
-    DenonSC3900.isCursorOnCuePoint(group)
-        ? engine.setValue(group, "cue_preview", true)
-        : engine.setValue(group, "cue_set", true)
-    ;
+    if (DenonSC3900.isCursorOnCuePoint(group)) {
+        if (DenonSC3900.vinylModeActivated) {
+            // Disable scratching in order to let mixxx playback the track while
+            // we hold down the CUE button and the platter is stopped.
+            DenonSC3900.disableScratching(group);
+        }
+
+        engine.setValue(group, "cue_preview", true);
+    } else {
+        engine.setValue(group, "cue_set", true);
+    }
 }
 
 // on CUE button release
 DenonSC3900.onCueButtonRelease = function (channel, control, value, status, group) {
-    // the cue preview mode is setting the `play` flag to true, so we make sure
-    // it is disabled when releasing the cue button
+    // The `cue_preview` mode is setting the `play` flag to true, so we make
+    // sure it is disabled when releasing the CUE button.
     engine.setValue(group, "play", false);
     engine.setValue(group, "cue_gotoandstop", true);
+
+    if (DenonSC3900.vinylModeActivated) {
+        // Enable back scratching in order to be able to move the vinyl disc to
+        // navigate through the track around the CUE point.
+        DenonSC3900.enableScratching(group);
+    }
 }
 
 // #############################################################################
@@ -699,10 +717,8 @@ DenonSC3900.onPlayPauseButtonPress = function (channel, control, value, status, 
  * speed change when the platter speed changes.
  *
  * @param string group
- * @param bool   shouldUpdateScratchingStatus Indicates whether we should update
- *               the scratching status when the platter state has changed.
  */
-DenonSC3900.dontApplyVinylDiscRotationWhilePlatterStateIsChanging = function (group, shouldUpdateScratchingStatus) {
+DenonSC3900.dontApplyVinylDiscRotationSpeedWhilePlatterStateIsChanging = function (group) {
     DenonSC3900.applyVinylDiscRotationSpeed = false;
 
     // We disable the scratching engine as we stop to consider the jog wheel
@@ -714,11 +730,9 @@ DenonSC3900.dontApplyVinylDiscRotationWhilePlatterStateIsChanging = function (gr
         function () {
             DenonSC3900.applyVinylDiscRotationSpeed = true;
 
-            if (shouldUpdateScratchingStatus) {
-                // Decide whether the scratching engine should be enabled back
-                // or not.
-                DenonSC3900.updateScratchingStatus(group);
-            }
+            // Decide whether the scratching engine should be enabled back
+            // or not.
+            DenonSC3900.updateScratchingStatus(group);
         },
         true
     );
@@ -740,7 +754,7 @@ DenonSC3900.onVinylButtonPress = function (channel, control, value, status, grou
     if (DenonSC3900.playing) {
         // When the playback is on, avoid to consider the jog wheel messages
         // while the platter is changing its state.
-        DenonSC3900.dontApplyVinylDiscRotationWhilePlatterStateIsChanging(group, true);
+        DenonSC3900.dontApplyVinylDiscRotationSpeedWhilePlatterStateIsChanging(group);
     }
 
     DenonSC3900.updatePlatterStatus(outputChannel);
