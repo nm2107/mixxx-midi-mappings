@@ -217,6 +217,7 @@ DenonSC3900.jogWheelTimeIntervalCountElapsedBeforeWalkingAPulse = 0;
 // Activated by default when connecting the SC3900 unit in MIDI.
 DenonSC3900.vinylModeActivated = true;
 DenonSC3900.dropJogWheelMidiSignals = false;
+DenonSC3900.stoppedVinylDiscDetectionTimerId = null;
 // No playback by default when connecting the SC3900 unit in MIDI.
 DenonSC3900.playing = false;
 
@@ -444,7 +445,7 @@ DenonSC3900.onPitchFaderLsb = function (channel, control, value, status, group) 
 }
 
 // #############################################################################
-// ## Jog wheel management
+// ## Vinyl disc management
 // #############################################################################
 
 /**
@@ -572,6 +573,19 @@ DenonSC3900.jogWheelScratch = function (group) {
         ;
     }
 
+    // As the DenonSC3900 unit does not send any data when the disc is stopped
+    // (because it only sends data on disc move), we programmatically stop
+    // the disc (i.e. set its speed to 0) when the latest measured speed is low
+    // (i.e. < 0.1), and when we do not receive other disc rotation infos while
+    // a small amount of time.
+    // We use a timer instead of hard setting the 0 value here directly,
+    // in order to keep the smooth start and stop effect when the platter
+    // starts or stops.
+    vinylDiscSpeedRatio < 0.1
+        ? DenonSC3900.setStoppedVinylDiscDetectionTimer(group)
+        : DenonSC3900.removeStoppedVinylDiscDetectionTimer()
+    ;
+
     DenonSC3900.setScratchingRate(group, vinylDiscSpeedRatio * direction);
 }
 
@@ -590,6 +604,38 @@ DenonSC3900.jogWheelPitchBend = function (group) {
         "jog",
         finalValue * DenonSC3900.JOG_WHEEL_PITCH_BEND_SENSIBILITY
     );
+}
+
+/**
+ * Set the stopped vinyl disc detection timer if not already set.
+ *
+ * @param string group
+ */
+DenonSC3900.setStoppedVinylDiscDetectionTimer = function (group) {
+    if (null !== DenonSC3900.stoppedVinylDiscDetectionTimerId) {
+        return;
+    }
+
+    DenonSC3900.stoppedVinylDiscDetectionTimerId = engine.beginTimer(
+        DenonSC3900.PLATTER_STATE_TRANSITION_DURATION_MS / 2,
+        function () {
+            DenonSC3900.setScratchingRate(group, 0.0);
+        },
+        true
+    );
+}
+
+/**
+ * Removes the stopped vinyl disc detection timer if not already stopped.
+ */
+DenonSC3900.removeStoppedVinylDiscDetectionTimer = function () {
+    if (null === DenonSC3900.stoppedVinylDiscDetectionTimerId) {
+        return;
+    }
+
+    engine.stopTimer(DenonSC3900.stoppedVinylDiscDetectionTimerId);
+
+    DenonSC3900.stoppedVinylDiscDetectionTimerId = null;
 }
 
 // #############################################################################
