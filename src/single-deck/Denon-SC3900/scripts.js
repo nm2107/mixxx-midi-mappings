@@ -755,6 +755,8 @@ DenonSC3900.onVinylButtonPress = function (channel, control, value, status, grou
         // When the playback is on, avoid to consider the jog wheel messages
         // while the platter is changing its state.
         DenonSC3900.dontApplyVinylDiscRotationSpeedWhilePlatterStateIsChanging(group);
+    } else {
+        DenonSC3900.updateScratchingStatus(group);
     }
 
     DenonSC3900.updatePlatterStatus(outputChannel);
