@@ -57,6 +57,9 @@ DenonSC3900.DUMP_WRITE_ADDRESS = 0x29
 DenonSC3900.SHIFT_LOCK_WRITE_ADDRESS = 0x59
 DenonSC3900.SELECT_WRITE_ADDRESS = 0x1E
 
+// Set it to `normal` or `hybrid` in function of your usage.
+DenonSC3900.MIDI_MODE = "normal";
+
 // You may change this value to increase the sensibility of the jog wheel when
 // used for pitch bending.
 // > 1 : more sensible
@@ -113,6 +116,13 @@ DenonSC3900.LONG_PRESS_THRESHOLD_MS = 500;
 // #############################################################################
 // ## Utilities
 // #############################################################################
+
+/**
+ * @return bool
+ */
+DenonSC3900.isNormalMidiMode = function () {
+    return "normal" === DenonSC3900.MIDI_MODE;
+}
 
 /**
  * @param number inputChannel (0 based)
@@ -174,6 +184,19 @@ DenonSC3900.isHotcueSet = function (group, hotcueNumber) {
  *
  * @return bool
  */
+DenonSC3900.isPlaying = function (group) {
+    if (DenonSC3900.isNormalMidiMode()) {
+        return DenonSC3900.playing;
+    }
+
+    return engine.getValue(group, "play");
+}
+
+/**
+ * @param string group
+ *
+ * @return bool
+ */
 DenonSC3900.isCursorOnCuePoint = function (group) {
     // the CUE point position, in samples
     var cuePointPosition = engine.getValue(group, "cue_point");
@@ -214,12 +237,18 @@ DenonSC3900.jogWheelBend = 64;
 DenonSC3900.jogWheelPulseWidthMsb = 0;
 DenonSC3900.jogWheelPulseWidthLsb = 0;
 DenonSC3900.jogWheelTimeIntervalCountElapsedBeforeWalkingAPulse = 0;
-// Activated by default when connecting the SC3900 unit in MIDI.
-DenonSC3900.vinylModeActivated = true;
+// Activated by default when connecting the SC3900 unit in normal MIDI mode.
+// For hybrid MIDI mode, the vinyl mode is managed by the SC3900 unit itself,
+// so this var is always false.
+DenonSC3900.vinylModeActivated = DenonSC3900.isNormalMidiMode();
 DenonSC3900.applyVinylDiscRotationSpeed = true;
 DenonSC3900.stoppedVinylDiscDetectionTimerId = null;
-// No playback by default when connecting the SC3900 unit in MIDI.
-DenonSC3900.playing = false;
+// No playback by default when connecting the SC3900 unit in normal MIDI mode.
+// This value should only be considered for normal MIDI mode as the SC3900 unit
+// manages its own playing state in hybrid MIDI mode.
+// Always use the `isPlaying` function to know the playing state instead of this
+// var directly.
+DenonSC3900.playing = !DenonSC3900.isNormalMidiMode();
 
 // #############################################################################
 // ## Shutdown management
@@ -227,6 +256,12 @@ DenonSC3900.playing = false;
 
 // on deck init
 DenonSC3900.init = function () {
+    if (!DenonSC3900.isNormalMidiMode()) {
+        // The items managed by this `init` functions are managed by the
+        // SC3900 unit directly when in hybrid MIDI mode.
+        return;
+    }
+
     // As we don't have the channel information for the SC3900 decks during
     // init or shutdown functions, we blindly assume that all the mixxx decks
     // are SC3900.
@@ -271,17 +306,23 @@ DenonSC3900.resetLightsToNormalMidiModeDefault = function (outputChannel) {
         );
     }
 
-    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.REVERSE_WRITE_ADDRESS);
-    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.CUE_WRITE_ADDRESS);
-    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.PLAY_WRITE_ADDRESS);
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.SYNC_WRITE_ADDRESS);
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.KEY_ADJUST_WRITE_ADDRESS);
     // vinyl mode LED is ON when connecting the SC3900 unit
-    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_ON, DenonSC3900.VINYL_WRITE_ADDRESS);
-    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.DUMP_WRITE_ADDRESS);
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.SHIFT_LOCK_WRITE_ADDRESS);
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.SELECT_WRITE_ADDRESS);
 
+    if (!DenonSC3900.isNormalMidiMode()) {
+        // The remaining items are managed by the SC3900 unit directly when in
+        // hybrid MIDI mode.
+        return;
+    }
+
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.CUE_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.PLAY_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.REVERSE_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_ON, DenonSC3900.VINYL_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.DUMP_WRITE_ADDRESS);
     DenonSC3900.stopPlatter(outputChannel);
 }
 
@@ -348,7 +389,7 @@ DenonSC3900.onClrButtonRelease = function () {
 DenonSC3900.onHotcuePress = function (group, hotcueNumber) {
     var action = DenonSC3900.clrButtonPressed
         ? "clear"
-        : (DenonSC3900.isHotcueSet(group, hotcueNumber) && !DenonSC3900.playing)
+        : (DenonSC3900.isHotcueSet(group, hotcueNumber) && !DenonSC3900.isPlaying(group))
             ? "goto"
             : "activate"
     ;
@@ -418,11 +459,13 @@ DenonSC3900.onSyncButtonRelease = function (channel, control, value, status, gro
 // #############################################################################
 
 // on pitch fader MSB change
+// Not triggered in hybrid MIDI mode.
 DenonSC3900.onPitchFaderMsb = function (channel, control, value) {
     DenonSC3900.pitchFaderMsb = value;
 }
 
 // on pitch fader LSB change
+// Not triggered in hybrid MIDI mode.
 DenonSC3900.onPitchFaderLsb = function (channel, control, value, status, group) {
     var msbValue = DenonSC3900.pitchFaderMsb;
 
@@ -492,21 +535,25 @@ DenonSC3900.setScratchingRate = function (group, rate) {
 }
 
 // on jog wheel bend change
+// Not triggered in hybrid MIDI mode.
 DenonSC3900.onJogWheelBend = function (channel, control, value) {
     DenonSC3900.jogWheelBend = value;
 }
 
 // when the time interval count elapsed before walking a pulse changes
+// Not triggered in hybrid MIDI mode.
 DenonSC3900.onJogWheelTimeIntervalCountElapsedBeforeWalkingAPulse = function (channel, control, value) {
     DenonSC3900.jogWheelTimeIntervalCountElapsedBeforeWalkingAPulse = value
 }
 
 // on jog wheel pulse width MSB change
+// Not triggered in hybrid MIDI mode.
 DenonSC3900.onJogWheelPulseWidthMsb = function (channel, control, value) {
     DenonSC3900.jogWheelPulseWidthMsb = value;
 }
 
 // on jog wheel pulse width LSB change
+// Not triggered in hybrid MIDI mode.
 DenonSC3900.onJogWheelPulseWidthLsb = function (channel, control, value, status, group) {
     DenonSC3900.jogWheelPulseWidthLsb = value;
 
@@ -644,7 +691,7 @@ DenonSC3900.removeStoppedVinylDiscDetectionTimer = function () {
 
 // on CUE button press
 DenonSC3900.onCueButtonPress = function (channel, control, value, status, group) {
-    if (DenonSC3900.playing) {
+    if (DenonSC3900.isPlaying(group)) {
         if (DenonSC3900.vinylModeActivated) {
             // Tell mixxx to immediatly stop the disc rotation speed, and
             // ignore the received disc speed messages from the SC3900 while
@@ -660,6 +707,7 @@ DenonSC3900.onCueButtonPress = function (channel, control, value, status, group)
 
         engine.setValue(group, "cue_gotoandstop", value);
 
+        // Only matters in normal MIDI mode.
         DenonSC3900.playing = false;
 
         return;
@@ -697,14 +745,13 @@ DenonSC3900.onCueButtonRelease = function (channel, control, value, status, grou
 // #############################################################################
 
 // on Play/Pause button press
+// Not triggered in hybrid MIDI mode.
 DenonSC3900.onPlayPauseButtonPress = function (channel, control, value, status, group) {
     DenonSC3900.playing = !DenonSC3900.playing;
 
     engine.setValue(group, "play", DenonSC3900.playing);
 
     DenonSC3900.updatePlatterStatus(DenonSC3900.getOutputMidiChannel(channel));
-
-    DenonSC3900.updateScratchingStatus(group);
 }
 
 // #############################################################################
@@ -739,6 +786,7 @@ DenonSC3900.dontApplyVinylDiscRotationSpeedWhilePlatterStateIsChanging = functio
 }
 
 // on VINYL button press
+// Not triggered in hybrid MIDI mode.
 DenonSC3900.onVinylButtonPress = function (channel, control, value, status, group) {
     DenonSC3900.vinylModeActivated = !DenonSC3900.vinylModeActivated;
 
