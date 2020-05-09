@@ -128,7 +128,7 @@ However here are some that I found :
 | Platter speed decrease | `0x68` (104) | 0-70 : decrease the platter RPM from the given value (in %) from the base RPM |
 
 For each of these address, the `Command` (i.e. first MIDI 7bit block) is `0xBn`
-where `n` is the MODI channel ([0-15]).
+where `n` is the MIDI channel ([0-15]).
 
 Unfortuately it does not seem to have addresses to set the platter speed with
 precision (i.e. on a `0.01%` scale) :( .
