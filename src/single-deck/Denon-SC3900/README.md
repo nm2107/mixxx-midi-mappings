@@ -12,6 +12,7 @@ Refer to the general [README](/README.md) to know how to install this mapping.
 - [Features](#features)
 - [Normal MIDI mode](#normal-midi-mode)
 - [Hybrid MIDI mode](#hybrid-midi-mode)
+- [Undocumented MIDI addresses](#undocumented-midi-addresses)
 
 ## Deck configuration
 
@@ -89,7 +90,11 @@ In normal MIDI mode, the start and stop times potentiometers aren't considered,
 as there's no way to influence on the platter rotation speed via MIDI (or at
 least not that I know).
 
-The platter is either rotating at the normal speed, or stopped.
+The platter is either rotating at the normal speed, or stopped. Unfortunately
+the SC3900 doesn't have a MIDI adderss to set the platter speed precisely (i.e.
+to reflect the pitch rate). The only scale we can apply to the platter is
+1% RPM changes (see [this pull request](https://github.com/nm2107/mixxx-midi-mappings/pull/1))
+for more details.
 
 ## Hybrid MIDI mode
 
@@ -107,3 +112,23 @@ mode :
 - Pitch slider and +/- pitch bend buttons
 - Reverse button
 - Platter start and end time potentiometers
+
+## Undocumented MIDI addresses
+
+There are some MIDI addresses that aren't documented in the Denon manual
+(`V00`).
+
+However here are some that I found :
+
+| Item                       |      Addres   |  Value                                       |
+|----------------------------|:-------------:|----------------------------------------------|
+| [Platter start / stop](https://github.com/matthias-johnson/SC3900/blob/d63aaf89f08d1e2d5ffe9042e22adf28a0a27f36/SC3900-scripts.js#L54) |  `0x66` (102)   | `0` : stop, `127` : start |
+| Platter rotation direction |  `0x67` (103) | `0` : clock wise, `127` : counter clock wise |
+| Platter speed increse | `0x68` (104) | 0-100 : increase the platter RPM from the given value (in %) from the base RPM |
+| Platter speed decrease | `0x68` (104) | 0-70 : decrease the platter RPM from the given value (in %) from the base RPM |
+
+For each of these address, the `Command` (i.e. first MIDI 7bit block) is `0xBn`
+where `n` is the MODI channel ([0-15]).
+
+Unfortuately it does not seem to have addresses to set the platter speed with
+precision (i.e. on a `0.01%` scale) :( .
