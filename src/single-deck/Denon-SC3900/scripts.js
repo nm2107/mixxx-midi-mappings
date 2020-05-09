@@ -253,6 +253,7 @@ DenonSC3900.stoppedVinylDiscDetectionTimerId = null;
 // Always use the `isPlaying` function to know the playing state instead of this
 // var directly.
 DenonSC3900.playing = !DenonSC3900.isNormalMidiMode();
+DenonSC3900.vinylDiscSpeedRatio = 0.0;
 
 // #############################################################################
 // ## Init management
@@ -537,6 +538,12 @@ DenonSC3900.onPitchFaderLsb = function (channel, control, value, status, group) 
     // understood as the negative area and vice versa), so we fix it here by
     // multiplying the rate by -1.
     engine.setValue(group, "rate", rate * -1);
+
+    DenonSC3900.updatePlatterSpeed(
+        DenonSC3900.getOutputMidiChannel(channel),
+        group,
+        rate
+    );
 }
 
 // #############################################################################
@@ -671,6 +678,9 @@ DenonSC3900.jogWheelScratch = function (group) {
             : DenonSC3900.PLATTER_PULSE_WIDTH / pulseWidth
         ;
     }
+
+    // stored for debugging purposes
+    DenonSC3900.vinylDiscSpeedRatio = vinylDiscSpeedRatio;
 
     // As the DenonSC3900 unit does not send any data when the disc is stopped
     // (because it only sends data on disc move), we programmatically stop
@@ -904,4 +914,111 @@ DenonSC3900.updatePlatterStatus = function (outputChannel) {
         ? DenonSC3900.rotatePlatter(outputChannel)
         : DenonSC3900.stopPlatter(outputChannel)
     ;
+}
+
+DenonSC3900.debugSessionInitialized = false;
+DenonSC3900.debugTimerId = null;
+
+/**
+ * @param string group
+ * @param float rate
+ */
+DenonSC3900.updatePlatterSpeed = function (outputChannel, group, rate) {
+    if (DenonSC3900.debugSessionInitialized) {
+        return;
+    }
+    DenonSC3900.debugSessionInitialized = true;
+
+    // address to send the speed diff on the 1% scale
+    // var integerAddress = rate > 0
+    //     ? 0x68 // 104
+    //     : 0x69 // 105
+    // ;
+    // address to send the speed diff on the 0.01% scale
+    // // to be determined
+    // var restAddress = rate > 0
+    //     ? TBD
+    //     : TBD
+    // ;
+
+    // var pitchRange = engine.getValue(group, "rateRange");
+
+    // // percentage
+    // var absolutePitchDiff = Math.abs(rate * 100) * pitchRange;
+
+    // var diffInteger = Math.floor(absolutePitchDiff);
+    // var diffRest = absolutePitchDiff - diffInteger;
+
+    // var restAsInteger = diffInteger * 100;
+
+    // midi.sendShortMsg(
+    //     outputChannel,
+    //     integerAddress,
+    //     diffInteger
+    // );
+
+    // midi.sendShortMsg(
+    //     outputChannel,
+    //     restAddress,
+    //     restAsInteger
+    // );
+
+    var aValues = [0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80, 0x90, 0xA0, 0xB0, 0xC0, 0xD0, 0xE0, 0xF0];
+    var aIndex = 0;
+    var j = 0;
+
+    var callback = function () {
+        var high = Math.max(1.0, DenonSC3900.vinylDiscSpeedRatio);
+        var low = Math.min(1.0, DenonSC3900.vinylDiscSpeedRatio);
+
+        // the speed diff, on a 0.01% scale.
+        // When diff === 1, there is a 0.01% speed diff.
+        var diff = ( high - low ) * 100;
+        print("DEBUG: DIFF " + diff);
+
+        // use 1.4 as the threshold as there is already some diff when at pitch
+        // 0 (wavy cycles)
+        if (diff > 1.4) {
+            // FOUND !
+            print("DEBUG: FOUND NEAR " + aValues[aIndex] + " " + j);
+
+            engine.stopTimer(DenonSC3900.debugTimerId);
+        }
+
+        if (0xB0 === aValues[aIndex] && (j === 104 || j === 105)) {
+            // skip the addresses which are changing the platter speed by
+            // 1% scale.
+            // We want to find the 0.01 % scale.
+            print("DEBUG: DROPPING " + aValues[aIndex] + " " + j);
+        } else {
+            print("DEBUG: SENDING " + aValues[aIndex] + " " + j);
+            midi.sendShortMsg(
+                aValues[aIndex],
+                j,
+                99 // change the speed by 0.99%
+            );
+        }
+
+        ++j;
+
+        if (128 === j) {
+            j = 0;
+            ++aIndex;
+        }
+
+        if (16 === aIndex) {
+            // prevent acces to undefined index while the timer is being stopped
+            aIndex = 0;
+
+            print("DEBUG: ALL VALUES SENT, TERMINATING TIMER");
+
+            engine.stopTimer(DenonSC3900.debugTimerId);
+        }
+    };
+
+    DenonSC3900.debugTimerId = engine.beginTimer(
+        DenonSC3900.PLATTER_STATE_TRANSITION_DURATION_MS,
+        callback,
+        false
+    );
 }
