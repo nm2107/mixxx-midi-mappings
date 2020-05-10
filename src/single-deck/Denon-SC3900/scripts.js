@@ -875,7 +875,13 @@ DenonSC3900.onVinylButtonPress = function (channel, control, value, status, grou
         // while the platter is changing its state.
         DenonSC3900.dontApplyVinylDiscRotationSpeedWhilePlatterStateIsChanging(group);
     } else {
-        DenonSC3900.updateScratchingStatus(group);
+        if (DenonSC3900.vinylModeActivated) {
+            // Make sure the scratch engine won't start to play the track.
+            DenonSC3900.setScratchingRate(group, 0.0);
+            DenonSC3900.enableScratching(group);
+        } else {
+            DenonSC3900.disableScratching(group);
+        }
     }
 
     DenonSC3900.updatePlatterStatus(outputChannel, group);
