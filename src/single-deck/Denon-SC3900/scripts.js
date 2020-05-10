@@ -704,6 +704,10 @@ DenonSC3900.jogWheelScratch = function (group) {
  * @param string group
  */
 DenonSC3900.jogWheelPitchBend = function (group) {
+    if (!DenonSC3900.applyVinylDiscRotationSpeed) {
+        return;
+    }
+
     // The jog bend value is centered on 64 (0x40)
     var relativeValue = DenonSC3900.jogWheelBend - 64;
 
