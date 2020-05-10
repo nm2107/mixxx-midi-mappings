@@ -71,11 +71,11 @@ DenonSC3900.JOG_WHEEL_PITCH_BEND_SENSIBILITY = 1.0;
 // This address has been grabbed from :
 // https://github.com/matthias-johnson/SC3900/blob/d63aaf89f08d1e2d5ffe9042e22adf28a0a27f36/SC3900-scripts.js#L54
 // This address only accepts two values : 0 and 127 (i.e. stop and rotate).
-// I'm not aware of any addresses and values to set the platter rotation speed
-// (i.e. to influence on start and stop durations).
 DenonSC3900.PLATTER_WRITE_ADDRESS = 0x66
 DenonSC3900.PLATTER_ROTATE = 0x7F
 DenonSC3900.PLATTER_STOP = 0x00
+DenonSC3900.PLATTER_INCREASE_SPEED_BY_PERCENT_WRITE_ADDRESS = 0x68
+DenonSC3900.PLATTER_DECREASE_SPEED_BY_PERCENT_WRITE_ADDRESS = 0x69
 // You may change this value to 45 if your SC3900 unit is set to have 45 RPM.
 DenonSC3900.PLATTER_RPM = 33 + 1/3;
 DenonSC3900.PLATTER_STATE_TRANSITION_DURATION_MS = 400; // no matter RPM rate
@@ -253,6 +253,8 @@ DenonSC3900.stoppedVinylDiscDetectionTimerId = null;
 // Always use the `isPlaying` function to know the playing state instead of this
 // var directly.
 DenonSC3900.playing = !DenonSC3900.isNormalMidiMode();
+// Only considered in normal MIDI mode.
+DenonSC3900.pitchFaderRate = 0.0;
 
 // #############################################################################
 // ## Init management
@@ -285,7 +287,7 @@ DenonSC3900.init = function () {
             DenonSC3900.VINYL_WRITE_ADDRESS
         );
 
-        DenonSC3900.updatePlatterStatus(outputChannel);
+        DenonSC3900.updatePlatterStatus(outputChannel, group);
         DenonSC3900.updateScratchingStatus(group);
     }
 }
@@ -533,10 +535,20 @@ DenonSC3900.onPitchFaderLsb = function (channel, control, value, status, group) 
     // rate [-1; 1]
     var rate = (fullValue - 8192) / 8192;
 
+    // Only matters in normal MIDI mode.
+    DenonSC3900.pitchFaderRate = rate;
+
     // Somehow mixxx is inverting the rate (i.e. the positive pitch area is
     // understood as the negative area and vice versa), so we fix it here by
     // multiplying the rate by -1.
     engine.setValue(group, "rate", rate * -1);
+
+    if (DenonSC3900.vinylModeActivated) {
+        DenonSC3900.updatePlatterSpeed(
+            DenonSC3900.getOutputMidiChannel(channel),
+            group
+        );
+    }
 }
 
 // #############################################################################
@@ -803,7 +815,10 @@ DenonSC3900.onPlayPauseButtonPress = function (channel, control, value, status, 
 
     engine.setValue(group, "play", DenonSC3900.playing);
 
-    DenonSC3900.updatePlatterStatus(DenonSC3900.getOutputMidiChannel(channel));
+    DenonSC3900.updatePlatterStatus(
+        DenonSC3900.getOutputMidiChannel(channel),
+        group
+    );
 }
 
 // #############################################################################
@@ -859,7 +874,7 @@ DenonSC3900.onVinylButtonPress = function (channel, control, value, status, grou
         DenonSC3900.updateScratchingStatus(group);
     }
 
-    DenonSC3900.updatePlatterStatus(outputChannel);
+    DenonSC3900.updatePlatterStatus(outputChannel, group);
 }
 
 // #############################################################################
@@ -879,21 +894,25 @@ DenonSC3900.stopPlatter = function (outputChannel) {
 
 /**
  * @param number outputChannel
+ * @param string group
  */
-DenonSC3900.rotatePlatter = function (outputChannel) {
+DenonSC3900.rotatePlatter = function (outputChannel, group) {
     midi.sendShortMsg(
         outputChannel,
         DenonSC3900.PLATTER_WRITE_ADDRESS,
         DenonSC3900.PLATTER_ROTATE
     );
+
+    DenonSC3900.updatePlatterSpeed(outputChannel, group);
 }
 
 /**
  * Whether to rotate or stop the SC3900 platter, in function of the deck state.
  *
  * @param number outputChannel
+ * @param string group
  */
-DenonSC3900.updatePlatterStatus = function (outputChannel) {
+DenonSC3900.updatePlatterStatus = function (outputChannel, group) {
     if (!DenonSC3900.vinylModeActivated) {
         DenonSC3900.stopPlatter(outputChannel);
 
@@ -901,7 +920,60 @@ DenonSC3900.updatePlatterStatus = function (outputChannel) {
     }
 
     DenonSC3900.playing
-        ? DenonSC3900.rotatePlatter(outputChannel)
+        ? DenonSC3900.rotatePlatter(outputChannel, group)
         : DenonSC3900.stopPlatter(outputChannel)
     ;
+}
+
+/**
+ * @param number outputChannel
+ * @param string group
+ */
+DenonSC3900.updatePlatterSpeed = function (outputChannel, group) {
+    var rate = DenonSC3900.pitchFaderRate;
+
+    // Address to send the speed diff on the 0.01% scale.
+    // Unfortunately, this address doesn't seem to exist on the SC3900 :( .
+    // @see https://github.com/nm2107/mixxx-midi-mappings/pull/1
+    // var restAddress = rate > 0
+    //     ? TBD
+    //     : TBD
+    // ;
+
+    var pitchRange = engine.getValue(group, "rateRange");
+
+    // percentage
+    var absolutePitchDiff = Math.abs(rate * 100) * pitchRange;
+
+    var diffInteger = Math.floor(absolutePitchDiff);
+    // var diffRest = absolutePitchDiff - diffInteger;
+
+    // var restAsInteger = diffInteger * 100;
+
+    // Addresses to send the speed diff on the 1% scale.
+    // When the diffInteger equals `0`, we should send the message on both
+    // increase and decrease speed addresses to make a complete reset.
+    var integerAddresses = 0 === diffInteger
+        ? [
+            DenonSC3900.PLATTER_DECREASE_SPEED_BY_PERCENT_WRITE_ADDRESS,
+            DenonSC3900.PLATTER_INCREASE_SPEED_BY_PERCENT_WRITE_ADDRESS
+        ]
+        : rate > 0
+            ? [DenonSC3900.PLATTER_INCREASE_SPEED_BY_PERCENT_WRITE_ADDRESS]
+            : [DenonSC3900.PLATTER_DECREASE_SPEED_BY_PERCENT_WRITE_ADDRESS]
+    ;
+
+    for (var i = 0; i < integerAddresses.length; i++) {
+        midi.sendShortMsg(
+            outputChannel,
+            integerAddresses[i],
+            diffInteger
+        );
+    }
+
+    // midi.sendShortMsg(
+    //     outputChannel,
+    //     restAddress,
+    //     restAsInteger
+    // );
 }

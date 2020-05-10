@@ -91,7 +91,7 @@ as there's no way to influence on the platter rotation speed via MIDI (or at
 least not that I know).
 
 The platter is either rotating at the normal speed, or stopped. Unfortunately
-the SC3900 doesn't have a MIDI adderss to set the platter speed precisely (i.e.
+the SC3900 doesn't have a MIDI address to set the platter speed precisely (i.e.
 to reflect the pitch rate). The only scale we can apply to the platter is
 1% RPM changes (see [this pull request](https://github.com/nm2107/mixxx-midi-mappings/pull/1))
 for more details.
