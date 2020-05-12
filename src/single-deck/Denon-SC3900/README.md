@@ -120,12 +120,12 @@ There are some MIDI addresses that aren't documented in the Denon manual
 
 However here are some that I found :
 
-| Item                       |      Addres   |  Value                                       |
+| Item                       |     Address   |  Value                                       |
 |----------------------------|:-------------:|----------------------------------------------|
 | [Platter start / stop](https://github.com/matthias-johnson/SC3900/blob/d63aaf89f08d1e2d5ffe9042e22adf28a0a27f36/SC3900-scripts.js#L54) |  `0x66` (102)   | `0` : stop, `127` : start |
 | Platter rotation direction |  `0x67` (103) | `0` : clock wise, `127` : counter clock wise |
-| Platter speed increse | `0x68` (104) | 0-100 : increase the platter RPM from the given value (in %) from the base RPM |
-| Platter speed decrease | `0x68` (104) | 0-70 : decrease the platter RPM from the given value (in %) from the base RPM |
+| Platter speed increase | `0x68` (104) | 0-100 : increase the platter RPM from the given value (in %) from the base RPM |
+| Platter speed decrease | `0x69` (105) | 0-70 : decrease the platter RPM from the given value (in %) from the base RPM |
 
 For each of these address, the `Command` (i.e. first MIDI 7bit block) is `0xBn`
 where `n` is the MIDI channel ([0-15]).
