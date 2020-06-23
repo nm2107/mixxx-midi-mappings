@@ -31,7 +31,7 @@ way you want to use your SC3900.
 These variables are declared in the [`scripts.js`](./scripts.js) file.
 
 - `DenonSC3900.MIDI_MODE` : the MIDI mode you used to connect the SC3900 to the
-computer. Can be `normal` or `hybrid`. Defaults to `normal`.
+computer. Can be `normal` or `hybrid`. Defaults to `hybrid`.
 - `DenonSC3900.PLATTER_RPM` : use the same setting than on your SC3900.
 Defaults to `33 + 1/3`.
 - `DenonSC3900.JOG_WHEEL_PITCH_BEND_SENSIBILITY` : the sensibility of the vinyl
