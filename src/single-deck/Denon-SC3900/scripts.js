@@ -58,7 +58,7 @@ DenonSC3900.SHIFT_LOCK_WRITE_ADDRESS = 0x59
 DenonSC3900.SELECT_WRITE_ADDRESS = 0x1E
 
 // Set it to `normal` or `hybrid` in function of your usage.
-DenonSC3900.MIDI_MODE = "normal";
+DenonSC3900.MIDI_MODE = "hybrid";
 
 // You may change this value to increase the sensibility of the jog wheel when
 // used for pitch bending.
