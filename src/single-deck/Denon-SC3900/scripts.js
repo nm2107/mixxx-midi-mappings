@@ -272,7 +272,9 @@ DenonSC3900.init = function () {
     // init or shutdown functions, we blindly assume that all the mixxx decks
     // are SC3900.
     //
-    // @FIXME this blind behavior is dangerous !
+    // @FIXME this blind behavior is dangerous ! We should only target this
+    // unit instead.
+    // @see https://github.com/mixxxdj/manual/issues/118
     //
     // When connecting a deck to mixxx, make sure that the LED controlled via
     // listeners in this script as reflecting this script state.
@@ -338,7 +340,9 @@ DenonSC3900.shutdown = function () {
     // init or shutdown functions, we blindly assume that all the mixxx decks
     // are SC3900s, and that we're only shutting down a deck on mixxx exit.
     //
-    // @FIXME this blind behavior is dangerous !
+    // @FIXME this blind behavior is dangerous ! We should only target this
+    // unit instead.
+    // @see https://github.com/mixxxdj/manual/issues/118
     //
     // When leaving mixxx, we set back the SC3900 lights to their default
     // values (i.e. as how they are when we connect the deck for the first time
