@@ -19,7 +19,14 @@ $ make
 ```
 
 It will build the mapping from the [`src`](src) dir into the [`dist`](dist) dir,
-and then install the built files in your `~/.mixxx/controllers` dir.
+and then install the built files in the `controllers` directory of your mixxx
+path (defaults to `~/.mixxx`). If you're using another mixxx path, specify it
+during the `make` call :
+
+```bash
+# e.g. if you have installed mixxx via flatpak :
+$ MIXXX_PATH=~/.var/app/org.mixxx.Mixxx/.mixxx make
+```
 
 This installation method is meant for GNU/Linux hosts, but should be able to
 run on MacOS too. If you're a Windows user, you can try to run it with WSL,

@@ -1,6 +1,7 @@
 # How many single decks we plan to use. An XML mapping file will be built per
 # deck (one deck in a dedicated channel).
 SINGLE_DECKS_COUNT ?= 2
+MIXXX_PATH ?= ~/.mixxx
 
 # Make the vars declared in this Makefile available to scripts called there.
 export
@@ -20,7 +21,7 @@ install:
 	@find ./dist \
 		-type f \
 		\( -name "*.xml" -o -name "*.js" \) \
-		-exec cp {} ~/.mixxx/controllers/ \;
+		-exec cp {} $(MIXXX_PATH)/controllers/ \;
 	@echo "Installation complete."
 
 ################################################################################
