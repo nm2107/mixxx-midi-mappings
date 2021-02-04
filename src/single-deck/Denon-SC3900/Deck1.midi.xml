@@ -33,16 +33,6 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.onVinylButtonPress</key>
-                <description>Vinyl button press.</description>
-                <status>0x90</status>
-                <midino>0x04</midino>
-                <options>
-                    <script-binding/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
                 <key>DenonSC3900.onHotcue1Press</key>
                 <description>Hotcue 1 button press.</description>
                 <status>0x90</status>
@@ -161,26 +151,6 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>reverse</key>
-                <description>Reverse playback on reverse button press.</description>
-                <status>0x90</status>
-                <midino>0x46</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>reverse</key>
-                <description>Resume playback in forward direction on reverse button release.</description>
-                <status>0x80</status>
-                <midino>0x46</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
                 <key>loop_in</key>
                 <description>Tell loop in point to follow cursor on A button press.</description>
                 <status>0x90</status>
@@ -215,26 +185,6 @@
                 <description>Set loop out point on B button release.</description>
                 <status>0x80</status>
                 <midino>0x39</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>loop_halve</key>
-                <description>Halve loop size on loop - button press (in Normal MIDI mode).</description>
-                <status>0x90</status>
-                <midino>0x69</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>loop_double</key>
-                <description>Double loop size on loop + button press (in Normal MIDI mode).</description>
-                <status>0x90</status>
-                <midino>0x6A</midino>
                 <options>
                     <normal/>
                 </options>
@@ -304,16 +254,6 @@
             </control>
             <control>
                 <group>[Channel1]</group>
-                <key>DenonSC3900.onPlayPauseButtonPress</key>
-                <description>Play / pause button press.</description>
-                <status>0x90</status>
-                <midino>0x43</midino>
-                <options>
-                    <script-binding/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
                 <key>reverseroll</key>
                 <description>Start slip playback on DUMP button press.</description>
                 <status>0x90</status>
@@ -328,46 +268,6 @@
                 <description>Stop slip playback on DUMP button release.</description>
                 <status>0x80</status>
                 <midino>0x45</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>rate_temp_down</key>
-                <description>Start negative pitch bend on pitch bend - button press.</description>
-                <status>0x90</status>
-                <midino>0x09</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>rate_temp_down</key>
-                <description>Stop negative pitch bend on pitch bend - button release.</description>
-                <status>0x80</status>
-                <midino>0x09</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>rate_temp_up</key>
-                <description>Start positive pitch bend on pitch bend + button press.</description>
-                <status>0x90</status>
-                <midino>0x08</midino>
-                <options>
-                    <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>rate_temp_up</key>
-                <description>Stop positive pitch bend on pitch bend + button release.</description>
-                <status>0x80</status>
-                <midino>0x08</midino>
                 <options>
                     <normal/>
                 </options>
@@ -430,66 +330,6 @@
                 <midino>0x29</midino>
                 <options>
                     <normal/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>DenonSC3900.onPitchFaderMsb</key>
-                <description>Pitch slider MSB.</description>
-                <status>0xB0</status>
-                <midino>0x7A</midino>
-                <options>
-                    <script-binding/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>DenonSC3900.onPitchFaderLsb</key>
-                <description>Pitch slider LSB.</description>
-                <status>0xB0</status>
-                <midino>0x7B</midino>
-                <options>
-                    <script-binding/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>DenonSC3900.onJogWheelBend</key>
-                <description>Jog wheel bend.</description>
-                <status>0xB0</status>
-                <midino>0x51</midino>
-                <options>
-                    <script-binding/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>DenonSC3900.onJogWheelTimeIntervalCountElapsedBeforeWalkingAPulse</key>
-                <description>Indicates the count of time intervals elapsed before walking a pulse.</description>
-                <status>0xB0</status>
-                <midino>0x1A</midino>
-                <options>
-                    <script-binding/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>DenonSC3900.onJogWheelPulseWidthMsb</key>
-                <description>Jog wheel pulse width MSB.</description>
-                <status>0xB0</status>
-                <midino>0x1B</midino>
-                <options>
-                    <script-binding/>
-                </options>
-            </control>
-            <control>
-                <group>[Channel1]</group>
-                <key>DenonSC3900.onJogWheelPulseWidthLsb</key>
-                <description>Jog wheel pulse width LSB.</description>
-                <status>0xB0</status>
-                <midino>0x1C</midino>
-                <options>
-                    <script-binding/>
                 </options>
             </control>
             <control>
@@ -794,24 +634,6 @@
             </output>
             <output>
                 <group>[Channel1]</group>
-                <key>reverse</key>
-                <description>Light on reverse button when playback is in reverse direction.</description>
-                <status>0xB0</status>
-                <midino>0x4A</midino>
-                <on>0x3A</on>
-                <minimum>1</minimum>
-            </output>
-            <output>
-                <group>[Channel1]</group>
-                <key>reverse</key>
-                <description>Light off reverse button when playback is not in reverse direction.</description>
-                <status>0xB0</status>
-                <midino>0x4B</midino>
-                <on>0x3A</on>
-                <maximum>0</maximum>
-            </output>
-            <output>
-                <group>[Channel1]</group>
                 <key>loop_in</key>
                 <description>Blink A button when loop in point is active.</description>
                 <status>0xB0</status>
@@ -889,66 +711,6 @@
                 <status>0xB0</status>
                 <midino>0x4A</midino>
                 <on>0x1E</on>
-                <maximum>0</maximum>
-            </output>
-            <output>
-                <group>[Channel1]</group>
-                <key>cue_default</key>
-                <description>
-                    Light on CUE button when the CUE playback is enabled
-                    (CDJ CUE hold down style).
-                </description>
-                <status>0xB0</status>
-                <midino>0x4A</midino>
-                <on>0x26</on>
-                <minimum>1</minimum>
-            </output>
-            <output>
-                <group>[Channel1]</group>
-                <key>cue_default</key>
-                <description>
-                    Blink CUE button when not on a CUE point and when not being
-                    in a CUE playback.
-                </description>
-                <status>0xB0</status>
-                <midino>0x4C</midino>
-                <on>0x26</on>
-                <maximum>0</maximum>
-            </output>
-            <output>
-                <group>[Channel1]</group>
-                <key>play_indicator</key>
-                <description>Light on play button on playback.</description>
-                <status>0xB0</status>
-                <midino>0x4A</midino>
-                <on>0x27</on>
-                <minimum>1</minimum>
-            </output>
-            <output>
-                <group>[Channel1]</group>
-                <key>play_indicator</key>
-                <description>Blink play button on track pause.</description>
-                <status>0xB0</status>
-                <midino>0x4C</midino>
-                <on>0x27</on>
-                <maximum>0</maximum>
-            </output>
-            <output>
-                <group>[Channel1]</group>
-                <key>play_indicator</key>
-                <description>Light on CUE button on playback.</description>
-                <status>0xB0</status>
-                <midino>0x4A</midino>
-                <on>0x26</on>
-                <minimum>1</minimum>
-            </output>
-            <output>
-                <group>[Channel1]</group>
-                <key>play_indicator</key>
-                <description>Blink CUE button on track pause.</description>
-                <status>0xB0</status>
-                <midino>0x4C</midino>
-                <on>0x26</on>
                 <maximum>0</maximum>
             </output>
             <output>
