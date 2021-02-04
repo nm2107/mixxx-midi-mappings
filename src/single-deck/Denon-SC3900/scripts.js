@@ -12,6 +12,9 @@ DenonSC3900.AUTO_LOOP_WRITE_ADDRESS = 0x2B
 DenonSC3900.A_LOOP_LIGHT_WRITE_ADDRESS = 0X24
 DenonSC3900.B_LOOP_LIGHT_WRITE_ADDRESS = 0X40
 
+DenonSC3900.HYBRID_MIDI_LOOP_HALVE_VALUE = 0x7F
+DenonSC3900.HYBRID_MIDI_LOOP_DOUBLE_VALUE = 0x00
+
 DenonSC3900.HOTCUES_WRITE_ADDRESSES = {
     1: {
         light: 0x11,
@@ -353,6 +356,24 @@ DenonSC3900.shutdown = function () {
             DenonSC3900.getOutputMidiChannel(channel)
         );
     }
+}
+
+// #############################################################################
+// ## Loop management
+// #############################################################################
+
+// only triggered in hybrid MIDI mode
+DenonSC3900.onHybridMidiModeLoopSizeHalveOrDouble = function (channel, control, value, status, group) {
+    if (value !== DenonSC3900.HYBRID_MIDI_LOOP_HALVE_VALUE && value !== DenonSC3900.HYBRID_MIDI_LOOP_DOUBLE_VALUE) {
+        return;
+    }
+
+    var action = value === DenonSC3900.HYBRID_MIDI_LOOP_HALVE_VALUE
+        ? 'loop_halve'
+        : 'loop_double'
+    ;
+
+    engine.setValue(group, action, true);
 }
 
 // #############################################################################
