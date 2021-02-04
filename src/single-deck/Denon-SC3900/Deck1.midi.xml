@@ -222,7 +222,7 @@
             <control>
                 <group>[Channel1]</group>
                 <key>loop_halve</key>
-                <description>Halve loop size on loop - button press.</description>
+                <description>Halve loop size on loop - button press (in Normal MIDI mode).</description>
                 <status>0x90</status>
                 <midino>0x69</midino>
                 <options>
@@ -232,11 +232,21 @@
             <control>
                 <group>[Channel1]</group>
                 <key>loop_double</key>
-                <description>Double loop size on loop + button press.</description>
+                <description>Double loop size on loop + button press (in Normal MIDI mode).</description>
                 <status>0x90</status>
                 <midino>0x6A</midino>
                 <options>
                     <normal/>
+                </options>
+            </control>
+            <control>
+                <group>[Channel1]</group>
+                <key>DenonSC3900.onHybridMidiModeLoopSizeHalveOrDouble</key>
+                <description>Halve or double loop size on loop - / + button press (in Hybrid MIDI mode).</description>
+                <status>0xB0</status>
+                <midino>0x55</midino>
+                <options>
+                    <script-binding/>
                 </options>
             </control>
             <control>
