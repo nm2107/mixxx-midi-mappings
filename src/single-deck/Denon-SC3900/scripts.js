@@ -57,6 +57,9 @@ DenonSC3900.SELECT_WRITE_ADDRESS = 0x1E
 
 DenonSC3900.LONG_PRESS_THRESHOLD_MS = 500;
 
+// The time it takes to the SC3900 unit to start / stop the DVS signal, in ms.
+DenonSC3900.DVS_SIGNAL_STATE_CHANGE_DURATION_MS = 40;
+
 // @see https://www.mixxx.org/wiki/doku.php/mixxxcontrols
 DenonSC3900.BEATJUMP_SIZES = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64];
 DenonSC3900.BEATJUMP_SIZE_DEFAULT = 4; // same as when mixxx starts
@@ -142,9 +145,9 @@ DenonSC3900.isCursorOnCuePoint = function (group) {
     var highestPosition = Math.max(cuePointPosition, cursorPosition);
     var rate = lowestPosition / highestPosition;
 
-    // When the diff rate is below 1 per-mille, we consider the cursor position
-    // as being on the CUE point position.
-    return (1 - rate) < 0.001;
+    // When the diff rate is below 1 / 75, we consider the cursor position
+    // as being on the CUE point position (as on an audio CD).
+    return (1 - rate) < 1 / 75;
 }
 
 // #############################################################################
@@ -157,6 +160,10 @@ DenonSC3900.isCursorOnCuePoint = function (group) {
 
 DenonSC3900.clrButtonPressed = false;
 DenonSC3900.syncButtonPressedAt = null;
+
+// Set to false when the DVS state is changing (e.g. pausing), true otherwise
+// (e.g. plays).
+DenonSC3900.ableToSetCuePoint = true;
 
 // #############################################################################
 // ## Shutdown management
@@ -391,22 +398,59 @@ DenonSC3900.onSyncButtonRelease = function (channel, control, value, status, gro
 // on CUE button press
 DenonSC3900.onCueButtonPress = function (channel, control, value, status, group) {
     if (DenonSC3900.isPlaying(group)) {
-        engine.setValue(group, "cue_gotoandstop", value);
+        DenonSC3900.goToCuePointAndStopOnceDvsSignalHasStopped(group);
 
         return;
     }
 
-    if (DenonSC3900.isCursorOnCuePoint(group)) {
-        engine.setValue(group, "cue_preview", true);
-    } else {
+    if (!DenonSC3900.isCursorOnCuePoint(group) && DenonSC3900.isAbleToSetCuePoint()) {
         engine.setValue(group, "cue_set", true);
     }
 }
 
 // on CUE button release
 DenonSC3900.onCueButtonRelease = function (channel, control, value, status, group) {
-    // The `cue_preview` mode is setting the `play` flag to true, so we make
-    // sure it is disabled when releasing the CUE button.
-    engine.setValue(group, "play", false);
+    DenonSC3900.goToCuePointAndStopOnceDvsSignalHasStopped(group);
+}
+
+/**
+ * @param string group
+ */
+DenonSC3900.goToCuePointAndStopOnceDvsSignalHasStopped = function (group) {
+    DenonSC3900.disableCuePointSetting();
+
+    // Immediatly go to the CUE point, for better precision.
     engine.setValue(group, "cue_gotoandstop", true);
+
+    // Go to the CUE point once again when the DVS signal has fully stopped.
+    engine.beginTimer(
+        DenonSC3900.DVS_SIGNAL_STATE_CHANGE_DURATION_MS,
+        function () {
+            engine.setValue(group, "cue_gotoandstop", true);
+
+            DenonSC3900.enableCuePointSetting();
+        },
+        true
+    );
+}
+
+/**
+ * @return bool
+ */
+DenonSC3900.isAbleToSetCuePoint = function () {
+    return DenonSC3900.ableToSetCuePoint;
+}
+
+/**
+ * @return void
+ */
+DenonSC3900.enableCuePointSetting = function () {
+    DenonSC3900.ableToSetCuePoint = true;
+}
+
+/**
+ * @return void
+ */
+DenonSC3900.disableCuePointSetting = function () {
+    DenonSC3900.ableToSetCuePoint = false;
 }
