@@ -58,7 +58,7 @@ DenonSC3900.SELECT_WRITE_ADDRESS = 0x1E
 DenonSC3900.LONG_PRESS_THRESHOLD_MS = 500;
 
 // The time it takes to the SC3900 unit to start / stop the DVS signal, in ms.
-DenonSC3900.DVS_SIGNAL_STATE_CHANGE_DURATION_MS = 40;
+DenonSC3900.DVS_SIGNAL_STATE_CHANGE_DURATION_MS = 80;
 
 // @see https://www.mixxx.org/wiki/doku.php/mixxxcontrols
 DenonSC3900.BEATJUMP_SIZES = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64];
