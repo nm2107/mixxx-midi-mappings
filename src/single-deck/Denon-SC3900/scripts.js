@@ -134,7 +134,7 @@ DenonSC3900.isCursorOnCuePoint = function (group) {
     var cursorPositionRate = engine.getValue(group, "playposition");
     // the amount of samples in the track
     var trackSamplesCount = engine.getValue(group, "track_samples");
-
+    // the track sample rate, in Hz
     var trackSampleRate = engine.getValue(group, "track_samplerate");
 
     // the cursor position, in samples
@@ -144,7 +144,7 @@ DenonSC3900.isCursorOnCuePoint = function (group) {
     var distance = Math.abs(cuePointPosition - cursorPosition);
 
     // the duration of the distance, in seconds
-    var distanceDuration = distance * trackSampleRate;
+    var distanceDuration = distance / trackSampleRate;
 
     // When the distance duration is below 1 / 75, we consider
     // the cursor position as being on the CUE point position
