@@ -135,19 +135,21 @@ DenonSC3900.isCursorOnCuePoint = function (group) {
     // the amount of samples in the track
     var trackSamplesCount = engine.getValue(group, "track_samples");
 
+    var trackSampleRate = engine.getValue(group, "track_samplerate");
+
     // the cursor position, in samples
     var cursorPosition = cursorPositionRate * trackSamplesCount;
 
-    // Compare the difference rate instead of the position samples directly,
-    // as there can have a few samples diff (e.g. < 10) when the cursor is
-    // placed on the CUE point.
-    var lowestPosition = Math.min(cuePointPosition, cursorPosition);
-    var highestPosition = Math.max(cuePointPosition, cursorPosition);
-    var rate = lowestPosition / highestPosition;
+    // the amount of samples between the cursor and the cuepoint
+    var distance = Math.abs(cuePointPosition - cursorPosition);
 
-    // When the diff rate is below 1 / 75, we consider the cursor position
-    // as being on the CUE point position (as on an audio CD).
-    return (1 - rate) < 1 / 75;
+    // the duration of the distance, in seconds
+    var distanceDuration = distance * trackSampleRate;
+
+    // When the distance duration is below 1 / 75, we consider
+    // the cursor position as being on the CUE point position
+    // (as on an audio CD).
+    return distanceDuration < (1 / 75);
 }
 
 // #############################################################################
