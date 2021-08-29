@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<MixxxControllerPreset schemaVersion="1" mixxxVersion="2.2.3+">
+<MixxxControllerPreset schemaVersion="1" mixxxVersion="2.2.4">
     <info>
         <name>Denon SC3900 (Deck1 on Channel1)</name>
         <author>Nicolas MURE</author>
@@ -233,8 +233,8 @@
                 <group>[Channel1]</group>
                 <key>DenonSC3900.onCueButtonPress</key>
                 <description>
-                    On CUE button press : set CUE point when not on a CUE point,
-                    or start CUE playback when on a CUE point.
+                    On CUE button press : go to cuepoint if playing,
+                    or set the cuepoint if the cursor is not already on it.
                 </description>
                 <status>0x90</status>
                 <midino>0x42</midino>
@@ -245,7 +245,7 @@
             <control>
                 <group>[Channel1]</group>
                 <key>DenonSC3900.onCueButtonRelease</key>
-                <description>Stop CUE playback on CUE button release and get back to CUE point.</description>
+                <description>Go to cuepoint on CUE button release.</description>
                 <status>0x80</status>
                 <midino>0x42</midino>
                 <options>
