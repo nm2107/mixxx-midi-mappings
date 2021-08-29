@@ -312,9 +312,7 @@ DenonSC3900.onClrButtonRelease = function () {
 DenonSC3900.onHotcuePress = function (group, hotcueNumber) {
     var action = DenonSC3900.clrButtonPressed
         ? "clear"
-        : (DenonSC3900.isHotcueSet(group, hotcueNumber) && !DenonSC3900.isPlaying(group))
-            ? "goto"
-            : "activate"
+        : "activate"
     ;
 
     var valueName = "hotcue_" + hotcueNumber + "_" + action;
