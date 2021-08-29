@@ -60,11 +60,24 @@ DenonSC3900.LONG_PRESS_THRESHOLD_MS = 500;
 
 // @see https://manual.mixxx.org/2.3/en/chapters/appendix/mixxx_controls.html
 DenonSC3900.BEATJUMP_SIZES = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64];
-DenonSC3900.BEATJUMP_SIZE_DEFAULT = 4; // same as when mixxx starts
+// Mixxx uses a default beatjump size of 4, but we're using 32 here to ease
+// track navigation.
+DenonSC3900.BEATJUMP_SIZE_DEFAULT = 32;
 
 // #############################################################################
 // ## Utilities
 // #############################################################################
+
+/**
+ * @param number inputChannel (0 based)
+ *
+ * @return string
+ */
+DenonSC3900.inputChannelToGroupName = function (inputChannel) {
+    var groupNumber = inputChannel + 1;
+
+    return "[Channel" + groupNumber + "]";
+}
 
 /**
  * @param number inputChannel (0 based)
@@ -160,6 +173,31 @@ DenonSC3900.isCursorOnCuePoint = function (group) {
 
 DenonSC3900.clrButtonPressed = false;
 DenonSC3900.syncButtonPressedAt = null;
+
+// #############################################################################
+// ## Startup management
+// #############################################################################
+
+// on deck startup
+DenonSC3900.init = function () {
+    // As we don't have the channel information for the SC3900 decks during
+    // init or shutdown functions, we blindly assume that all the mixxx decks
+    // are SC3900s, and that we're only shutting down a deck on mixxx exit.
+    //
+    // @FIXME this blind behavior is dangerous ! We should only target this
+    // unit instead.
+    // @see https://github.com/mixxxdj/manual/issues/118
+    //
+    // When stating mixxx, set the beatjump size to our default value.
+
+    for (var channel = 0; channel < DenonSC3900.getDecksCount(); channel++) {
+        engine.setValue(
+            DenonSC3900.inputChannelToGroupName(channel),
+            "beatjump_size",
+            DenonSC3900.BEATJUMP_SIZE_DEFAULT
+        );
+    }
+}
 
 // #############################################################################
 // ## Shutdown management
