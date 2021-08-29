@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<MixxxControllerPreset schemaVersion="1" mixxxVersion="2.2.4">
+<MixxxControllerPreset schemaVersion="1" mixxxVersion="2.3.0+">
     <info>
         <name>Denon SC3900 (Deck1 on Channel1)</name>
         <author>Nicolas MURE</author>
