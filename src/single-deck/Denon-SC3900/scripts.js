@@ -134,10 +134,15 @@ DenonSC3900.isPlaying = function (group) {
 
 /**
  * @param string group
+ * @param float cursorWindow The additional cursor window width to consider
+ *                           to determine cursor position, in seconds.
+ *                           I.e. this function will return whether the cursor
+ *                           is on the cuepoint plus or minus this window.
+ *                           Defaults to 0.0 second.
  *
  * @return bool
  */
-DenonSC3900.isCursorOnCuePoint = function (group) {
+DenonSC3900.isCursorOnCuePoint = function (group, cursorWindow = 0.0) {
     // the CUE point position, in samples
     var cuePointPosition = engine.getValue(group, "cue_point");
 
@@ -160,7 +165,7 @@ DenonSC3900.isCursorOnCuePoint = function (group) {
     // When the distance duration is below 1 / 75, we consider
     // the cursor position as being on the CUE point position
     // (as on an audio CD).
-    return distanceDuration < (1 / 75);
+    return distanceDuration < ((1 / 75) + cursorWindow);
 }
 
 // #############################################################################
@@ -432,12 +437,24 @@ DenonSC3900.onSyncButtonRelease = function (channel, control, value, status, gro
 // on CUE button press
 DenonSC3900.onCueButtonPress = function (channel, control, value, status, group) {
     if (DenonSC3900.isPlaying(group)) {
-        engine.setValue(group, "cue_goto", true);
-
+        // Nothing to do here. The SC3900 unit will stop the DVS playback, and
+        // the onCueButtonRelease handler will move the cursor to the cuepoint.
         return;
     }
 
-    if (!DenonSC3900.isCursorOnCuePoint(group)) {
+    // As Mixxx updates the "play" indicator after one second of DVS playback,
+    // we look if the cursor is on the cue point with a window of +/- 1.0 second.
+    // If we don't use that window, hitting the CUE button less than one second
+    // after hitting the play button would make Mixxx think that the deck
+    // isn't playing, and so would set a cuepoint on the cursor instead of going
+    // to the last cuepoint.
+    // The drawback of this workaround is that you can't move the cuepoint from
+    // a distance of < 1.0 seconds.
+    //
+    // A better way to know whether the deck is playing or not would be to scan
+    // for DVS input signal volume, but I don't think there's a way for it yet.
+    var cursorWindow = 1.0;
+    if (!DenonSC3900.isCursorOnCuePoint(group, cursorWindow)) {
         engine.setValue(group, "cue_set", true);
     }
 }
