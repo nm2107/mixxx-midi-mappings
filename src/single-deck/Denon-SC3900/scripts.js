@@ -6,12 +6,13 @@
 function DenonSC3900 () {}
 
 // @see Denon SC3900 manual for hex values, on page 34.
+// @see https://cdn.inmusicbrands.com/denondj/legacy/sc3900/sc3900em-om-20130513-en.pdf
 DenonSC3900.LIGHT_ON = 0x4A
 DenonSC3900.LIGHT_OFF = 0x4B
 
 DenonSC3900.AUTO_LOOP_WRITE_ADDRESS = 0x2B
-DenonSC3900.A_LOOP_LIGHT_WRITE_ADDRESS = 0X24
-DenonSC3900.B_LOOP_LIGHT_WRITE_ADDRESS = 0X40
+DenonSC3900.A_LOOP_DIMMER_WRITE_ADDRESS = 0X3E
+DenonSC3900.B_LOOP_DIMMER_WRITE_ADDRESS = 0X2A
 
 DenonSC3900.HYBRID_MIDI_LOOP_HALVE_VALUE = 0x7F
 DenonSC3900.HYBRID_MIDI_LOOP_DOUBLE_VALUE = 0x00
@@ -196,12 +197,28 @@ DenonSC3900.init = function () {
     // When stating mixxx, set the beatjump size to our default value.
 
     for (var channel = 0; channel < DenonSC3900.getDecksCount(); channel++) {
+        // set default beatjump size
         engine.setValue(
             DenonSC3900.inputChannelToGroupName(channel),
             "beatjump_size",
             DenonSC3900.BEATJUMP_SIZE_DEFAULT
         );
+
+        // initialize dimmer lights
+        var outputChannel = DenonSC3900.getOutputMidiChannel(channel);
+
+        midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_ON, DenonSC3900.A_LOOP_DIMMER_WRITE_ADDRESS);
+        midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_ON, DenonSC3900.B_LOOP_DIMMER_WRITE_ADDRESS);
+
+        for (var i = 1; i <= DenonSC3900.getHotcuesCount(); i++) {
+            midi.sendShortMsg(
+                outputChannel,
+                DenonSC3900.LIGHT_ON,
+                DenonSC3900.HOTCUES_WRITE_ADDRESSES[i]["dimmer"]
+            );
+        }
     }
+
 }
 
 // #############################################################################
@@ -213,8 +230,8 @@ DenonSC3900.init = function () {
  */
 DenonSC3900.resetLightsToNormalMidiModeDefault = function (outputChannel) {
     midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.AUTO_LOOP_WRITE_ADDRESS);
-    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.A_LOOP_LIGHT_WRITE_ADDRESS);
-    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.B_LOOP_LIGHT_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.A_LOOP_DIMMER_WRITE_ADDRESS);
+    midi.sendShortMsg(outputChannel, DenonSC3900.LIGHT_OFF, DenonSC3900.B_LOOP_DIMMER_WRITE_ADDRESS);
 
     for (var i = 1; i <= DenonSC3900.getHotcuesCount(); i++) {
         midi.sendShortMsg(
